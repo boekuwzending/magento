@@ -1,0 +1,21 @@
+"Boekuwzending Admin Order Status","Status"
+"Boekuwzending Shipping Module","Boekuwzending Verzendmodule"
+"Client ID","Client ID"
+"Client Secret","Client Secret"
+"Create new order","Maak nieuwe order"
+"Create order","Meld order aan"
+"Error creating order","Fout bij aanmaken order"
+"Method Name","Methodenaam"
+"Order not known at Boekuwzending.","Order niet bekend bij Boekuwzending."
+"Order with id ""%1"" does not exist.","Order met id ""%1"" bestaat niet."
+"Orders at Boekuwzending:","Orders bij Boekuwzending:"
+"Ship to Applicable Countries","Verzenden naar toegestane landen"
+"Ship to Specific Countries","Verzenden naar specifieke landen"
+"Shipping cost without matrix","Verzendkosten zonder matrix"
+"Show Method if Not Applicable","Verzendmethode tonen indien niet van toepassing"
+"Sort Order","Sorteervolgorde"
+"Test mode","Testmodus"
+"View order details in Boekuwzending Admin","Bekijk orderdetails in Boekuwzending Admin"
+Boekuwzending,Boekuwzending
+Enabled,Ingeschakeld
+Title,Titel

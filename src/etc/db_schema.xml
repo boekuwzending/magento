@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="boekuwzending_order" resource="default" engine="innodb">
+        <column xsi:type="int" unsigned="true" nullable="false" identity="true" name="boekuwzending_order_id" />
+        <column xsi:type="int" unsigned="true" nullable="false" name="sales_order_id" />
+        <column xsi:type="timestamp" name="created_datetime" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created Datetime" />
+        <column xsi:type="timestamp" name="updated_datetime" nullable="true" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated Datetime" />
+
+        <column xsi:type="varchar" name="boekuwzending_external_order_id" length="100" nullable="false" comment="To store the Boekuwzending Id." />
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="boekuwzending_order_id" />
+        </constraint>
+
+        <constraint xsi:type="foreign" referenceId="BOEKUWZENDING_ORDER_SALES_ORDER_ID" table="boekuwzending_order" column="sales_order_id" referenceTable="sales_order" referenceColumn="entity_id" />
+    </table>
+</schema>

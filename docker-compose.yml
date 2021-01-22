@@ -1,0 +1,66 @@
+version: "3.8"
+
+# Listing our three containers. Or "services", as known by Docker Compose.
+services:
+    # Defining our MySQL container.
+    # "mysql" will be the network alias for this container.
+    mysql:
+        image: mysql:5.7
+        container_name: magento-buz-mysql
+        networks:
+            - magento-buz-network
+        ports:
+            - "3306:3306"
+        volumes:
+            - magento-buz-mysql-data:/var/lib/mysql
+        env_file:
+          - env
+
+    # Defining our Elasticsearch container
+    # "elasticsearch" will be the network alias for this container.
+    elasticsearch:
+        image: elasticsearch:7.8.1
+        container_name: magento-buz-elasticsearch
+        networks:
+            - magento-buz-network
+        ports:
+            - "9200:9200"
+            - "9300:9300"
+        env_file:
+          - env
+        environment:
+            discovery.type: single-node
+
+    # Defining our custom Magento 2 container.
+    # "web" will be the network alias for this container.
+    web:
+        # The build section tells Docker Compose how to build the image.
+        # This essentially runs a "docker build" command.
+        build:
+            context: .
+            dockerfile: magento-ubuntu.dock
+            args:
+                USER: kevin
+                UID: 1000
+                GID: 1000
+        container_name: magento-buz-web
+        networks:
+            - magento-buz-network
+        ports:
+            - "5000:5000"
+        environment:
+            MAGE_IS_DEVELOPER_MODE: "true"
+            XDEBUG_CONFIG: remote_host=host.docker.internal remote_port=9000 remote_enable=1
+        volumes:
+            - magento2:/magento2
+            # Comment this line during Magento installation, directory must be empty
+            - ./src:/magento2/app/code/Boekuwzending/Magento
+
+# The volume that is used by the MySQL container
+volumes:
+    magento-buz-mysql-data:
+    magento2:
+
+# The network where all the containers will live
+networks:
+    magento-buz-network:

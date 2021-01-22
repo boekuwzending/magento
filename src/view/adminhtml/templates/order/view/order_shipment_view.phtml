@@ -1,0 +1,73 @@
+<?php
+/**
+ * @var \Magento\Sales\Block\Adminhtml\Order\View\Info $block
+ */
+
+$order = $block->getOrder();
+
+$boekuwZendingOrderUrl = $block->getBoekuwzendingOrderUrl();
+$boekuwzendingOrders = $block->getBoekuwzendingOrders();
+$orderLinkText = $block->escapeHtml(__("View order details in Boekuwzending Admin"));
+?>
+
+<section class="admin__page-section order-view-boekuwzending-shipping">
+    <div class="admin__page-section-title">
+        <span class="title"><?= $block->escapeHtml(__("Boekuwzending")) ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item order-payment-method">
+            <div class="admin__page-section-item-title">
+                <span class="title"><?= $block->escapeHtml(__("Boekuwzending Admin Order Status")) ?></span>
+            </div>
+            <div class="admin__page-section-item-content">
+                <?php if ($boekuwzendingOrders) { ?>
+                    <p><?= $block->escapeHtml(__("Orders at Boekuwzending:"))?></p>
+                    <ol id="boekuwzending_order_list">
+                    <?php foreach ($boekuwzendingOrders as $buzOrder) { ?>
+                        <li><a target="_blank" href="<?=str_replace("{id}", $buzOrder->getBoekuwzendingExternalOrderId(), $boekuwZendingOrderUrl)?>"><?=$orderLinkText?></a></li>
+                    <?php } ?>
+                    </ol>
+                    <p><a href="#" id="boekuwzending_create_order_link"><?= $block->escapeHtml(__("Create new order")) ?></a></p>
+                <?php } else { ?>
+                    <?= $block->escapeHtml(__("Order not known at Boekuwzending.")) ?>
+                    <p><a href="#" id="boekuwzending_create_order_link"><?= $block->escapeHtml(__("Create order")) ?></a></p>
+                <?php } ?>
+
+                <div id="boekuwzending_order_status"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript">
+    require([
+        'jquery',
+        'domReady!'
+    ], function ($) {
+        $createOrderLink = $("#boekuwzending_create_order_link");
+        if ($createOrderLink) {
+            $createOrderLink.click(function() {
+                $.ajax( {
+                    url: "<?= $block->getUrl("boekuwzending/order/createOrder", ["order_id" => $order->getId()]) ?>",
+                    data: {form_key: window.FORM_KEY},
+                    type: "POST",
+                    showLoader: true 
+                }).done(function(a) { 
+                    if (a.isAjaxRedirect === "1") {
+                        // We're logged out.
+                        return;
+                    }
+
+                    const orderLink = "<?=$boekuwZendingOrderUrl?>"; 
+                    const orderList = $("#boekuwzending_order_list");
+                    orderList.append("<li><a target=\"_blank\" href=\"" + orderLink.replace("{id}", a.boekuwzending_id) + "\"><?=$orderLinkText?></a></li>");
+                }).fail(function(e) {
+                    console.error(e);
+                    $("#boekuwzending_order_status").append("<p><?= $block->escapeHtml(__("Error creating order"))?></p>");
+                });
+                     
+                return false;    
+            });
+        }
+    });
+</script>
