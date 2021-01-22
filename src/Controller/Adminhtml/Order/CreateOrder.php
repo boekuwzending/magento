@@ -8,7 +8,6 @@ use Magento\Framework\App\ResponseInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
 
 use Boekuwzending\Resource\Order as BoekuwzendingApiOrder;
-use \Boekuwzending\Serializer\Serializer as BoekuwzendingApiSerializer;
 use Boekuwzending\Magento\Api\OrderRepositoryInterface as BoekuwzendingOrderRepositoryInterface;
 
 class CreateOrder extends Action
@@ -95,20 +94,10 @@ class CreateOrder extends Action
         // Create in database
         $boekuwzendingOrder->save();
 
-        // Prepare for return (TODO: what to return?)
-        foreach ($buzOrder->getOrderLines() as &$line) {
-            $line->setDimensions(null);
-        }
-
-        $buzSerializer = new BoekuwzendingApiSerializer();
-
         $response = [
             "success" => "true",
             "magento_order_id" => $magentoOrderId,
             "boekuwzending_id" => "".$buzOrder->getId(),
-            "boekuwzending_external_id" => "".$buzOrder->getExternalId(),
-            "buz_order" => $buzSerializer->serialize($buzOrder),
-            "magento_order" => $order
         ];
 
         /** @var \Magento\Framework\Controller\Result\Json $resultJson */
