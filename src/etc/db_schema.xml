@@ -2,7 +2,7 @@
 <schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
     <table name="boekuwzending_order" resource="default" engine="innodb">
         <column xsi:type="int" unsigned="true" nullable="false" identity="true" name="boekuwzending_order_id" />
-        <column xsi:type="int" unsigned="true" nullable="false" name="sales_order_id" />
+        <column xsi:type="int" unsigned="true" nullable="false" name="sales_order_id" padding="10" />
         <column xsi:type="timestamp" name="created_datetime" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created Datetime" />
         <column xsi:type="timestamp" name="updated_datetime" nullable="true" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated Datetime" />
 
