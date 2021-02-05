@@ -6,7 +6,7 @@ services:
     # "mysql" will be the network alias for this container.
     mysql:
         image: mysql:5.7
-        container_name: magento-buz-mysql
+        container_name: magento24-buz-mysql
         networks:
             - magento-buz-network
         ports:
@@ -20,7 +20,7 @@ services:
     # "elasticsearch" will be the network alias for this container.
     elasticsearch:
         image: elasticsearch:7.8.1
-        container_name: magento-buz-elasticsearch
+        container_name: magento24-buz-elasticsearch
         networks:
             - magento-buz-network
         ports:
@@ -43,7 +43,7 @@ services:
                 USER: kevin
                 UID: 1000
                 GID: 1000
-        container_name: magento-buz-web
+        container_name: magento24-buz-web
         networks:
             - magento-buz-network
         ports:
@@ -54,7 +54,7 @@ services:
         volumes:
             - magento2:/magento2
             # Comment this line during Magento installation, directory must be empty
-            - ./src:/magento2/app/code/Boekuwzending/Magento
+            #- ./../../src:/magento2/app/code/Boekuwzending/Magento
 
 # The volume that is used by the MySQL container
 volumes:
