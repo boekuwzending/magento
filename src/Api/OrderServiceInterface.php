@@ -2,12 +2,13 @@
 
 namespace Boekuwzending\Magento\Api;
 
+use Boekuwzending\Resource\Order;
+
 interface OrderServiceInterface {
 
     /**
      * @param $order_id
-     *
-     * @return \Boekuwzending\Resource\Order
+     * @return Order
      */
-    public function getById($order_id);
+    public function getById($order_id): Order;
 }

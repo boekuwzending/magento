@@ -2,6 +2,8 @@
 
 namespace Boekuwzending\Magento\Api;
 
+use Boekuwzending\Magento\Api\Data\OrderInterface;
+
 interface OrderRepositoryInterface
 {
     /**
@@ -10,7 +12,7 @@ interface OrderRepositoryInterface
      * @param string $orderId
      * @return array
      */
-    public function getByOrderId($orderId);
+    public function getByOrderId(string $orderId): array;
 
     /**
      * Create a new order entity.
@@ -18,5 +20,5 @@ interface OrderRepositoryInterface
      * @param array $data
      * @return OrderInterface
      */
-    public function create(array $data = []);
+    public function create(array $data = []): OrderInterface;
 }
