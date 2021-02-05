@@ -1,5 +1,5 @@
 docker-compose up -d --force-recreate
-docker-compose exec --user=root web chown -R kevin:kevin /magento2
+docker-compose -p magentoboekuwzending24 exec --user=root web chown -R kevin:kevin /magento2
 
 # TODO: automatically run contents of webserver-install.sh on "web"
 

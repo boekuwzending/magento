@@ -1,0 +1,1 @@
+docker-compose -p magentoboekuwzending24 exec web /bin/bash
