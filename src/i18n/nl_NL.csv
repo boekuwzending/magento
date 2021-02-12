@@ -1,5 +1,5 @@
 "Boekuwzending Admin Order Status","Status"
-"Boekuwzending Shipping Module","Boekuwzending Verzendmodule"
+"Boekuwzending Shipping Module","Boekuwzending"
 "Client ID","Client ID"
 "Client Secret","Client Secret"
 "Create new order","Maak nieuwe order"
@@ -17,5 +17,5 @@
 "Test mode","Testmodus"
 "View order details in Boekuwzending Admin","Bekijk orderdetails in Boekuwzending Admin"
 Boekuwzending,Boekuwzending
-Enabled,Ingeschakeld
+Enabled,"Toon verzendmethode in checkout"
 Title,Titel
