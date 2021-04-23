@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        PHP_VERSION: ['7.3-fpm', '7.4-fpm']
+        PHP_VERSION: ['php7.3-fpm', 'php7.4-fpm']
         MAGENTO_VERSION: ['2.3.6', '2.4.2']
 
     steps:
