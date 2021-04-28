@@ -26,7 +26,7 @@ jobs:
 
       - name: run setup
         run: |
-          docker exec magento php bin/magento setup:upgrade boekuwzending/magento
+          docker exec magento php bin/magento setup:upgrade
           docker exec magento php bin/magento setup:di:compile
 
       - name: Cleanup
