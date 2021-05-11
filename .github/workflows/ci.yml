@@ -12,9 +12,6 @@ jobs:
       matrix:
         PHP_VERSION: ['php73-fpm', 'php74-fpm']
         MAGENTO_VERSION: ['2.3.6', '2.4.2']
-        exclude:
-          - PHP_VERSION: php74-fpm
-            MAGENTO_VERSION: 2.3.6
 
     steps:
       - uses: actions/checkout@v2
