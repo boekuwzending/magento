@@ -30,6 +30,8 @@ $orderLinkText = $block->escapeHtml(__("View order details in Boekuwzending Admi
                     <p><a href="#" id="boekuwzending_create_order_link"><?= $block->escapeHtml(__("Create new order")) ?></a></p>
                 <?php } else { ?>
                     <?= $block->escapeHtml(__("Order not known at Boekuwzending.")) ?>
+                    <ol id="boekuwzending_order_list">
+                    </ol>
                     <p><a href="#" id="boekuwzending_create_order_link"><?= $block->escapeHtml(__("Create order")) ?></a></p>
                 <?php } ?>
 

@@ -1,7 +1,7 @@
 # Scripts
 
 ## .\Install.ps1
-Registreert de Docker-containers onder hun eigen stack-naam ("magentoboekuwzending", zie .env).
+Registreert de Docker-containers onder hun eigen stack-naam ("magentoboekuwzending24", zie .env).
 
 ## Handmatige installatie
 Run, via Bash, eenmalig de commando's uit het script `webserver-install.sh` op de Bash-terminal op de webserver.

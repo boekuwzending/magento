@@ -85,7 +85,7 @@ class BoekuwzendingClient implements IBoekuwzendingClient
         $contact = new Contact();
         $contact->setName($order->getCustomerName());
         $contact->setCompany($shippingAddress->getCompany());
-        $contact->setPhoneNumber($shippingAddress->getTelephone());
+        $contact->setPhoneNumber($shippingAddress->getTelephone() ?? "");
         $contact->setEmailAddress($shippingAddress->getEmail());
 
         $buzOrder->setShipToContact($contact);
