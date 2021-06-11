@@ -54,7 +54,7 @@ services:
         volumes:
             - magento2:/magento2
             # Comment this line during Magento installation, directory must be empty
-            #- ./../../src:/magento2/app/code/Boekuwzending/Magento
+            - ./../../src:/magento2/app/code/Boekuwzending/Magento
 
 # The volume that is used by the MySQL container
 volumes:
