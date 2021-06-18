@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
-    <event name="checkout_submit_all_after">
-        <observer name="boekuwzending_magento_checkout_submit_all_after" instance="Boekuwzending\Magento\Observer\CreateBoekuwzendingOrder" />
-    </event>
-    <event name="paypal_express_place_order_success">
-        <observer name="paypal_payment" instance="Boekuwzending\Magento\Observer\CreateBoekuwzendingOrder" />
-    </event>
-</config>
