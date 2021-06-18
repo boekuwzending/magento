@@ -3,6 +3,7 @@
 namespace Boekuwzending\Magento\Plugin\Order;
 
 use Boekuwzending\Magento\Service\IBoekuwzendingClient;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Sales\Api\Data\OrderExtensionFactory;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
@@ -28,6 +29,10 @@ class OrderRepository
      * @var IBoekuwzendingClient
      */
     private $client;
+    /**
+     * @var ScopeConfigInterface
+     */
+    private $scopeConfig;
 
     /**
      * @param Collection $statusCollection
@@ -35,12 +40,14 @@ class OrderRepository
      * @param \Boekuwzending\Magento\Api\OrderRepositoryInterface $boekuwzendingOrderRepo
      */
     public function __construct(
+        ScopeConfigInterface $scopeConfig,
         Collection $statusCollection,
         LoggerInterface $logger,
         \Boekuwzending\Magento\Api\OrderRepositoryInterface $boekuwzendingOrderRepo,
         IBoekuwzendingClient $client
     )
     {
+        $this->scopeConfig = $scopeConfig;
         $this->statusCollection = $statusCollection;
         $this->logger = $logger;
         $this->boekuwzendingOrderRepository = $boekuwzendingOrderRepo;
@@ -59,10 +66,13 @@ class OrderRepository
     )
     {
         try {
-            // Skip non-"processing" states
+            $triggerStates = $this->scopeConfig->getValue("carriers/boekuwzending/triggerOnOrderStatus", \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+            $triggerStates = explode(",", $triggerStates ?? "");
+
+            // Skip non-"processing" states (or whatever is configured)
             $state = $result->getState();
-            $this->logger->debug("Order state '" . $state . "'");
-            if ("processing" !== $state) {
+            $this->logger->debug("Order state '" . $state . "', expecting '" . implode("', '", $triggerStates) . "'");
+            if (!in_array($state, $triggerStates, true)) {
                 return $result;
             }
 
@@ -79,10 +89,8 @@ class OrderRepository
             $this->createBoekuwzendingOrder($magentoOrderId, $result);
 
             return $result;
-        }
-        catch (\Exception $ex)
-        {
-            $this->logger->error("Error creating order: ". $ex);
+        } catch (\Exception $ex) {
+            $this->logger->error("Error creating order: " . $ex);
         }
     }
 
