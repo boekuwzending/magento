@@ -7,8 +7,8 @@
     <preference for="Boekuwzending\Magento\Api\Data\OrderInterface" type="Boekuwzending\Magento\Model\Order" />
     <preference for="Boekuwzending\Magento\Api\OrderRepositoryInterface" type="Boekuwzending\Magento\Model\OrderRepository" />
 
-    <!-- Order plugin to read custom field -->
-    <type name="Magento\Sales\Api\OrderRepositoryInterface">
-        <plugin name="Boekuwzending_Magento::OrderRepositoryPlugin" type="Boekuwzending\Magento\Plugin\Order\OrderRepositoryPlugin" />
+    <!-- Order plugin to react to status changes -->
+    <type name="Magento\Sales\Model\OrderRepository">
+        <plugin name="Boekuwzending_Magento::OrderRepositoryPlugin" type="Boekuwzending\Magento\Plugin\Order\OrderRepository" />
     </type>
 </config>

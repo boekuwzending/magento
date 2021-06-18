@@ -7,7 +7,7 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
 use Psr\Log\LoggerInterface;
 
-class OrderRepositoryPlugin {
+class OrderRepository {
 
     /**
      * @var Collection
@@ -29,8 +29,6 @@ class OrderRepositoryPlugin {
     ) {
         $this->statusCollection = $statusCollection;
         $this->logger = $logger;
-
-        $this->logger->warning("OrderRepositoryPlugin::__construct?");
     }
 
     /**
@@ -43,13 +41,14 @@ class OrderRepositoryPlugin {
         OrderRepositoryInterface $subject,
         OrderInterface $result
     ) {
-        throw new \Exception("test");
-
         /*if (\Magento\Sales\Api\Data\Order:: === $result->getState()) {
             // TODO
         }*/
 
         $state = $result->getState();
+
+        $this->logger->debug("Order state: " . $state);
+
         $collection = $this->statusCollection->toOptionArray();
 
         return $result;
