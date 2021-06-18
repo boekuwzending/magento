@@ -3,15 +3,12 @@
     <!-- Boekuwzending Client -->
     <preference for="Boekuwzending\Magento\Service\IBoekuwzendingClient" type="Boekuwzending\Magento\Service\BoekuwzendingClient" />
     
-    <!-- API classes -->
-    <preference for="Boekuwzending\Magento\Api\OrderServiceInterface" type="Boekuwzending\Magento\Model\OrderSerivce" />
-
     <!-- Order entity -->
     <preference for="Boekuwzending\Magento\Api\Data\OrderInterface" type="Boekuwzending\Magento\Model\Order" />
     <preference for="Boekuwzending\Magento\Api\OrderRepositoryInterface" type="Boekuwzending\Magento\Model\OrderRepository" />
 
     <!-- Order plugin to read custom field -->
     <type name="Magento\Sales\Api\OrderRepositoryInterface">
-        <plugin name="boekuwzending_order_order_id" type="Boekuwzending\Magento\Plugin\OrderRepositoryPlugin" />
+        <plugin name="Boekuwzending_Magento::OrderRepositoryPlugin" type="Boekuwzending\Magento\Plugin\Order\OrderRepositoryPlugin" />
     </type>
 </config>

@@ -1,39 +1,44 @@
 <?php
+
 namespace Boekuwzending\Magento\Observer;
 
+use Boekuwzending\Magento\Service\IBoekuwzendingClient;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
 use Boekuwzending\Magento\Api\OrderRepositoryInterface as BoekuwzendingOrderRepositoryInterface;
+use Psr\Log\LoggerInterface;
 
 class CreateBoekuwzendingOrder implements ObserverInterface
 {
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     private $logger;
 
     /**
-    * @var \Boekuwzending\Magento\Service\IBoekuwzendingClient
-    */
+     * @var IBoekuwzendingClient
+     */
     private $client;
- 
+
     /**
      * @var BoekuwzendingOrderRepositoryInterface
      */
     private $boekuwzendingOrderRepository;
 
     /**
-     * @param \Psr\Log\LoggerInterface                              $logger
-     * @param \Magento\Sales\Api\OrderRepositoryInterface           $magentoOrderRepository
-     * @param \Boekuwzending\Magento\Service\IBoekuwzendingClient   $client
-     * @param BoekuwzendingOrderRepositoryInterface                 $boekuwzendingOrderRepository
+     * @param LoggerInterface $logger
+     * @param OrderRepositoryInterface $magentoOrderRepository
+     * @param IBoekuwzendingClient $client
+     * @param BoekuwzendingOrderRepositoryInterface $boekuwzendingOrderRepository
      */
     public function __construct(
-        \Psr\Log\LoggerInterface $logger,
-        \Boekuwzending\Magento\Service\IBoekuwzendingClient $client,
+        LoggerInterface $logger,
+        IBoekuwzendingClient $client,
         BoekuwzendingOrderRepositoryInterface $boekuwzendingOrderRepository
-    ) {
+    )
+    {
         $this->logger = $logger;
         $this->client = $client;
         $this->boekuwzendingOrderRepository = $boekuwzendingOrderRepository;
@@ -44,7 +49,8 @@ class CreateBoekuwzendingOrder implements ObserverInterface
      *
      * @return void
      */
-    public function execute(Observer $observer) {
+    public function execute(Observer $observer)
+    {
         // try-catch it all, because if this method throws, the order won't be placed.
         try {
             $this->createBoekuwzendingOrder($observer);
@@ -53,27 +59,28 @@ class CreateBoekuwzendingOrder implements ObserverInterface
         }
     }
 
-    private function createBoekuwzendingOrder(Observer $observer) {
+    private function createBoekuwzendingOrder(Observer $observer)
+    {
         /** @var MagentoOrder $magentoOrder */
         $order = $observer->getEvent()->getOrder();
 
-        $this->logger->info("CreateBoekuwzendingOrder::createBoekuwzendingOrder() for Magento order '" . $order->getId() . "'"); 
+        $this->logger->info("CreateBoekuwzendingOrder::createBoekuwzendingOrder() for Magento order '" . $order->getId() . "'");
 
         $buzId = $order->getBoekuwzendingOrderId();
         $magentoOrderId = $order->getId();
 
         if ($buzId) {
-            $this->logger->info("Already known at Boekuwzending: '" . $buzId . "'"); 
+            $this->logger->info("Already known at Boekuwzending: '" . $buzId . "'");
             return;
         }
         if (!$magentoOrderId) {
-            $this->logger->info("Empty Magento order id. Is the order saved?"); 
+            $this->logger->info("Empty Magento order id. Is the order saved?");
             return;
         }
 
         // TODO: status handling, API unreachable?
         $buzOrder = $this->client->createOrder($order);
-        
+
         $buzId = $buzOrder->getId();
 
         // Prepare the entity, linking it to the Magento order and the Boekuwzending order
@@ -85,6 +92,6 @@ class CreateBoekuwzendingOrder implements ObserverInterface
         // Create in database
         $boekuwzendingOrder->save();
 
-        $this->logger->info("Created Boekuwzending order: '" . $buzId . "' for Magento order '" . $magentoOrderId . "'"); 
+        $this->logger->info("Created Boekuwzending order: '" . $buzId . "' for Magento order '" . $magentoOrderId . "'");
     }
 }
