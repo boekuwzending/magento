@@ -31,6 +31,10 @@ class BoekuwzendingClient implements IBoekuwzendingClient
      * @var string
      */
     private $environment;
+    /**
+     * @var mixed
+     */
+    private $clientId;
 
     /**
      * @param \Psr\Log\LoggerInterface $logger
@@ -43,12 +47,12 @@ class BoekuwzendingClient implements IBoekuwzendingClient
         AddressParser $addressParser 
     ) {
         $this->logger = $logger;
-        $id = $scopeConfig->getValue("carriers/boekuwzending/clientId", \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        $this->clientId = $scopeConfig->getValue("carriers/boekuwzending/clientId", \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
         $secret = $scopeConfig->getValue("carriers/boekuwzending/clientSecret", \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
         $staging = $scopeConfig->getValue("carriers/boekuwzending/testmode", \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
         
         $this->environment = $staging ? \Boekuwzending\Client::ENVIRONMENT_STAGING : \Boekuwzending\Client::ENVIRONMENT_LIVE;
-        $this->client = \Boekuwzending\ClientFactory::build($id, $secret, $this->environment);
+        $this->client = \Boekuwzending\ClientFactory::build($this->clientId, $secret, $this->environment);
 
         $this->addressParser = $addressParser;
     }
@@ -62,7 +66,7 @@ class BoekuwzendingClient implements IBoekuwzendingClient
     }
 
     public function createOrder(MagentoOrder $order) : \Boekuwzending\Resource\Order {
-        $this->logger->info("BoekuwzendingClient::createOrder(): " . $order->getId()); 
+        $this->logger->info("BoekuwzendingClient::createOrder(): " . $order->getId() . ", clientId: " . $this->clientId);
         
         // TODO: try-catch, status handling
         $buzOrder = $this->mapOrder($order);
