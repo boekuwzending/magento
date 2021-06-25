@@ -2,7 +2,7 @@
 Een module die orders inschiet bij Boekuwzending.
 
 # Installatie
-Als de module klaar is, zou dit de installatie moeten zijn met servertoegang:
+Voer op de server uit, als de www-user, in de Magento-directory:
 
     composer require boekuwzending/magento 
     bin/magento module:enable Boekuwzending_Magento
@@ -14,9 +14,7 @@ Wanneer tijdens de ontwikkeling van de module een dependency toegevoegd dient te
 
     /magento2$composer require boekuwzending/php-sdk
 
-Maar dit moet dus voor iedere volgende dependency weer gebeuren, en deze dependency moet ook worden opgenomen in de composer.json van dit project.
-
-Daarna:
+Dit moet dus voor iedere volgende dependency weer gebeuren, en deze dependency moet ook worden opgenomen in de composer.json van dit project. Daarna:
 
     bin/magento module:enable Boekuwzending_Magento
     bin/magento setup:upgrade
@@ -40,5 +38,7 @@ Wanneer het is ingeschakeld, kun je vanuit VS Code met F5 attachen. Breakpoints 
 # Configuratie
 * Klik op Stores, en onder Settings op Configuration.
 * Ga naar Sales -> Delivery Methods
-* Scroll naar "BoekuwZending Shipping Module"
+* Scroll naar "Boekuwzending"
+
+Zie [docs.boekuwzending.com/plugin/magento](https://docs.boekuwzending.com/plugin/magento) voor meer informatie.
 
