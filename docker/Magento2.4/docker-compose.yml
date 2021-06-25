@@ -50,7 +50,7 @@ services:
             - "5000:5000"
         environment:
             MAGE_IS_DEVELOPER_MODE: "true"
-            XDEBUG_CONFIG: remote_host=host.docker.internal remote_port=9000 remote_enable=1
+            XDEBUG_CONFIG: mode=debug discover_client_host=0 client_port=9003 client_host=host.docker.internal remote_port=9003 remote_host=host.docker.internal remote_enable=1
         volumes:
             - magento2:/magento2
             # Comment this line during Magento installation, directory must be empty

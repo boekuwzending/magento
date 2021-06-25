@@ -4,18 +4,19 @@
 "Client Secret","Client Secret"
 "Create new order","Create new order"
 "Create order","Create order"
+"Enabled for Checkout","Enabled for Checkout"
 "Error creating order","Error creating order"
+"Forward Order on Status Change to","Forward Order on Status Change to"
 "Method Name","Method Name"
 "Order not known at Boekuwzending.","Order not known at Boekuwzending."
 "Order with id ""%1"" does not exist.","Order with id ""%1"" does not exist."
 "Orders at Boekuwzending:","Orders at Boekuwzending:"
 "Ship to Applicable Countries","Ship to Applicable Countries"
 "Ship to Specific Countries","Ship to Specific Countries"
-"Shipping cost without matrix","Shipping cost without matrix"
+"Shipping Cost Without Matrix","Shipping Cost Without Matrix"
 "Show Method if Not Applicable","Show Method if Not Applicable"
 "Sort Order","Sort Order"
-"Test mode","Test mode"
+"Test Mode","Test Mode"
 "View order details in Boekuwzending Admin","View order details in Boekuwzending Admin"
 Boekuwzending,Boekuwzending
-Enabled,Enabled
 Title,Title

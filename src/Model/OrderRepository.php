@@ -125,7 +125,7 @@ class OrderRepository implements OrderRepositoryInterface
      *
      * @return OrderInterface
      */
-    public function create(array $data = [])
+    public function create(array $data = []): OrderInterface
     {
         return $this->orderFactory->create($data);
     }
@@ -135,7 +135,7 @@ class OrderRepository implements OrderRepositoryInterface
      *
      * @return OrderInterface[]|null
      */
-    public function getByOrderId($orderId)
+    public function getByOrderId(int $orderId)
     {
         return $this->getByFieldWithValue(Order::FIELD_SALES_ORDER_ID, $orderId);
     }
