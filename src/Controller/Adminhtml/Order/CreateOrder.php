@@ -1,24 +1,28 @@
 <?php
 namespace Boekuwzending\Magento\Controller\Adminhtml\Order;
 
+use Boekuwzending\Magento\Service\IBoekuwzendingClient;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
 
 use Boekuwzending\Resource\Order as BoekuwzendingApiOrder;
 use Boekuwzending\Magento\Api\OrderRepositoryInterface as BoekuwzendingOrderRepositoryInterface;
+use Magento\Sales\Model\ResourceModel\Order;
 
 class CreateOrder extends Action
 {    
     /**
-     * @var \Magento\Framework\App\RequestInterface
+     * @var RequestInterface
      */
     protected $request;
 
     /**
-     * @var \Magento\Sales\Api\OrderRepositoryInterface
+     * @var OrderRepositoryInterface
      */
     private $magentoOrderRepository;
  
@@ -28,30 +32,35 @@ class CreateOrder extends Action
     private $boekuwzendingOrderRepository;
  
     /**
-    * @var \Magento\Framework\Controller\Result\JsonFactory
+    * @var JsonFactory
     */
     private $resultJsonFactory;
     
     /**
-    * @var \Boekuwzending\Magento\Service\IBoekuwzendingClient $client
+    * @var IBoekuwzendingClient
     */
     private $client;
 
     /**
+     * @var Order
+     */
+    private $orderResourceModel;
+
+    /**
      * @param RequestInterface $request
      * @param Context $context
-     * @param \Magento\Sales\Api\OrderRepositoryInterface $magentoOrderRepository,
-     * @param \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory
-     * @param \Boekuwzending\Magento\Service\IBoekuwzendingClient $client
+     * @param OrderRepositoryInterface $magentoOrderRepository,
+     * @param JsonFactory $resultJsonFactory
+     * @param IBoekuwzendingClient $client
      * @param BoekuwzendingOrderRepositoryInterface $boekuwzendingOrderRepository
      */
     public function __construct(
         RequestInterface $request,
         Context $context,
-        \Magento\Sales\Api\OrderRepositoryInterface $magentoOrderRepository,
-        \Magento\Sales\Model\ResourceModel\Order $orderResourceModel,
-        \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory,
-        \Boekuwzending\Magento\Service\IBoekuwzendingClient $client,
+        OrderRepositoryInterface $magentoOrderRepository,
+        Order $orderResourceModel,
+        JsonFactory $resultJsonFactory,
+        IBoekuwzendingClient $client,
         BoekuwzendingOrderRepositoryInterface $boekuwzendingOrderRepository
     ) {
         parent::__construct($context);

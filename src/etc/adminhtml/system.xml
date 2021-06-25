@@ -4,8 +4,8 @@
         <section id="carriers" translate="label" type="text" sortOrder="320" showInDefault="1" showInWebsite="1" showInStore="1">
             <group id="boekuwzending" translate="label" type="text" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Boekuwzending Shipping Module</label>
-                <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
-                    <label>Enabled</label>
+                <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0" >
+                    <label>Enabled for Checkout</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="title" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -15,7 +15,7 @@
                     <label>Method Name</label>
                 </field>
                 <field id="shipping_cost" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0" >
-                    <label>Shipping cost without matrix</label>
+                    <label>Shipping Cost Without Matrix</label>
                     <validate>validate-number validate-zero-or-greater</validate>
                 </field>
 
@@ -25,12 +25,17 @@
                 <field id="clientSecret" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0" >
                     <label>Client Secret</label>
                 </field>
-                <field id="testmode" translate="label" type="select" sortOrder="55" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
-                    <label>Test mode</label>
+                <field id="testmode" translate="label" type="select" sortOrder="55" showInDefault="1" showInWebsite="1" showInStore="0" >
+                    <label>Test Mode</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
 
-                <field id="sallowspecific" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                <field id="triggerOnOrderStatus" translate="label" type="multiselect" sortOrder="56" showInDefault="1" showInWebsite="1" showInStore="0" >
+                    <label>Forward Order on Status Change to</label>
+                    <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
+                </field>
+
+                <field id="sallowspecific" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0" >
                     <label>Ship to Applicable Countries</label>
                     <frontend_class>shipping-applicable-country</frontend_class>
                     <source_model>Magento\Shipping\Model\Config\Source\Allspecificcountries</source_model>
