@@ -66,17 +66,18 @@ class OrderRepository
     )
     {
         try {
+            $magentoOrderId = $result->getEntityId();
+
             $triggerStates = $this->scopeConfig->getValue("carriers/boekuwzending/triggerOnOrderStatus", \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
             $triggerStates = explode(",", $triggerStates ?? "");
 
             // Skip non-"processing" states (or whatever is configured)
             $state = $result->getState();
-            $this->logger->debug("Order state '" . $state . "', expecting '" . implode("', '", $triggerStates) . "'");
+            $this->logger->debug("Order " . $magentoOrderId . " has state '" . $state . "', expecting '" . implode("', '", $triggerStates) . "'");
             if (!in_array($state, $triggerStates, true)) {
                 return $result;
             }
 
-            $magentoOrderId = $result->getEntityId();
             $boekuwzendingOrders = $this->boekuwzendingOrderRepository->getByOrderId($magentoOrderId);
             $orderCount = is_array($boekuwzendingOrders) ? count($boekuwzendingOrders) : 0;
 
