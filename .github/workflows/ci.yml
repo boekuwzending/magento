@@ -1,0 +1,36 @@
+name: Integration Test
+
+on:
+  pull_request:
+
+jobs:
+  Magento:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        PHP_VERSION: ['php73-fpm', 'php74-fpm']
+        MAGENTO_VERSION: ['2.3.6', '2.4.2']
+        exclude:
+          - PHP_VERSION: php74-fpm
+            MAGENTO_VERSION: 2.3.6
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Start Docker
+        run: docker run --detach --name magento michielgerritsen/magento-project-community-edition:${{ matrix.PHP_VERSION }}-magento${{ matrix.MAGENTO_VERSION }}
+
+      - name: Install extension in Magento
+        run: |
+          docker exec magento composer require boekuwzending/magento
+          docker exec magento php bin/magento module:enable Boekuwzending_Magento
+
+      - name: run setup
+        run: |
+          docker exec magento php bin/magento setup:upgrade
+          docker exec magento php bin/magento setup:di:compile
+
+      - name: Cleanup
+        run: docker exec magento php bin/magento cache:clean
