@@ -9,7 +9,7 @@
     },
     "require": {
         "magento/framework": "~102.0|~103.0",
-        "boekuwzending/php-sdk": "^0.3.2"
+        "boekuwzending/php-sdk": "^0.3.7"
     },
     "type": "magento2-module",
     "license": [
