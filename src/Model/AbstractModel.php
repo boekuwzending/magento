@@ -11,8 +11,8 @@ use Magento\Framework\Model\AbstractModel as AbstractBasicModel;
 
 class AbstractModel extends AbstractBasicModel
 {
-    const FIELD_CREATED_DATETIME = 'created_datetime';
-    const FIELD_UPDATED_DATETIME = 'updated_datetime';
+    public const FIELD_CREATED_DATETIME = 'created_datetime';
+    public const FIELD_UPDATED_DATETIME = 'updated_datetime';
 
     /**
      * @var DateTime

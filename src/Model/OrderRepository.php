@@ -5,6 +5,7 @@ namespace Boekuwzending\Magento\Model;
 use Magento\Framework\Api\Filter;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Api\SearchCriteriaInterface;
+use Magento\Framework\Api\SearchResults;
 use Magento\Framework\Api\SearchResultsInterfaceFactory;
 use Magento\Framework\Api\SortOrder;
 use Magento\Framework\Exception\CouldNotSaveException;
@@ -42,10 +43,12 @@ class OrderRepository implements OrderRepositoryInterface
     protected $searchResults;
 
     /**
-     * AbstractRepository constructor.
+     * OrderRepository constructor.
      *
      * @param SearchResultsInterfaceFactory $searchResultsFactory
-     * @param SearchCriteriaBuilder         $searchCriteriaBuilder
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param OrderCollectionFactory $collectionFactory
+     * @param OrderFactory $orderFactory
      */
     public function __construct(
         SearchResultsInterfaceFactory $searchResultsFactory,
@@ -60,12 +63,12 @@ class OrderRepository implements OrderRepositoryInterface
     }
 
     /**
-     * Retrieve a list of Matrixrates.
+     * Retrieve a list of Orders.
      *
      * @param SearchCriteriaInterface $criteria
      * @return SearchResultsInterface
      */
-    public function getList(SearchCriteriaInterface $criteria)
+    public function getList(SearchCriteriaInterface $criteria): SearchResultsInterface
     {
         $searchResults = $this->getSearchResults($criteria);
         $collection = $this->collectionFactory->create();
@@ -89,7 +92,7 @@ class OrderRepository implements OrderRepositoryInterface
      * @return OrderInterface
      * @throws CouldNotSaveException
      */
-    public function save(OrderInterface $order)
+    public function save(OrderInterface $order): OrderInterface
     {
         try {
             $order->save();
@@ -107,7 +110,7 @@ class OrderRepository implements OrderRepositoryInterface
      * @return OrderInterface
      * @throws NoSuchEntityException
      */
-    public function getById($identifier)
+    public function getById($identifier): OrderInterface
     {
         $order = $this->orderFactory->create();
         $order->load($identifier);
@@ -135,9 +138,23 @@ class OrderRepository implements OrderRepositoryInterface
      *
      * @return OrderInterface[]|null
      */
-    public function getByOrderId(int $orderId)
+    public function getByOrderId(int $orderId): ?array
     {
         return $this->getByFieldWithValue(Order::FIELD_SALES_ORDER_ID, $orderId);
+    }
+
+    /**
+     * @param string $externalOrderId
+     *
+     * @return OrderInterface|null
+     */
+    public function getByExternalOrderId(string $externalOrderId): ?OrderInterface
+    {
+        $oneOrZero = $this->getByFieldWithValue(Order::FIELD_BOEKUWZENDING_EXTERNAL_ORDER_ID, $externalOrderId);
+
+        return null === $oneOrZero || empty($oneOrZero)
+            ? null
+            : $oneOrZero[0];
     }
 
     // Repository boilerplate below
@@ -148,14 +165,15 @@ class OrderRepository implements OrderRepositoryInterface
      *
      * @return OrderInterface[]|null
      */
-    public function getByFieldWithValue($field, $value)
+    public function getByFieldWithValue($field, $value): ?array
     {
         $searchCriteria = $this->searchCriteriaBuilder->addFilter($field, $value);
 
-        /** @var \Magento\Framework\Api\SearchResults $list */
+        /** @var SearchResults $list */
         $list = $this->getList($searchCriteria->create());
 
         if ($list->getTotalCount()) {
+            /** @noinspection PhpUnnecessaryLocalVariableInspection - for debugging */
             $items = $list->getItems();
             return $items;
         }

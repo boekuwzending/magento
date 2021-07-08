@@ -11,18 +11,18 @@ use Boekuwzending\Magento\Api\Data\OrderInterface;
 
 class Order extends AbstractModel implements OrderInterface
 {
-    const FIELD_BOEKUWZENDING_ORDER_ID = 'boekuwzending_order_id'; // PK
-    const FIELD_SALES_ORDER_ID = 'sales_order_id'; // FK
-    const FIELD_BOEKUWZENDING_EXTERNAL_ORDER_ID = 'boekuwzending_external_order_id';
-    
+    public const FIELD_BOEKUWZENDING_ORDER_ID = 'boekuwzending_order_id'; // PK
+    public const FIELD_SALES_ORDER_ID = 'sales_order_id'; // FK
+    public const FIELD_BOEKUWZENDING_EXTERNAL_ORDER_ID = 'boekuwzending_external_order_id';
+
     /**
-     * @param Context                            $context
-     * @param Registry                           $registry
-     * @param OrderFactory                       $orderFactory
-     * @param DateTime                           $dateTime
-     * @param AbstractResource                   $resource
-     * @param AbstractDb                         $resourceCollection
-     * @param array                              $data
+     * @param Context $context
+     * @param Registry $registry
+     * @param OrderFactory $orderFactory
+     * @param DateTime $dateTime
+     * @param AbstractResource $resource
+     * @param AbstractDb $resourceCollection
+     * @param array $data
      */
     public function __construct(
         Context $context,
@@ -31,13 +31,10 @@ class Order extends AbstractModel implements OrderInterface
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
-    ) {
-        parent::__construct($context, $registry, $dateTime, $resource, $resourceCollection, $data);
-    }
-
-    protected function _construct()
+    )
     {
-        $this->_init('Boekuwzending\Magento\Model\ResourceModel\Order');
+        parent::__construct($context, $registry, $dateTime, $resource, $resourceCollection, $data);
+        $this->_init(__CLASS__);
     }
 
     /**
@@ -45,18 +42,20 @@ class Order extends AbstractModel implements OrderInterface
      *
      * @return string
      */
-    public function getBoekuwzendingExternalOrderId() {
+    public function getBoekuwzendingExternalOrderId() : mixed
+    {
         return $this->getData(static::FIELD_BOEKUWZENDING_EXTERNAL_ORDER_ID);
     }
-    
+
     /**
      * Set the id at Boekuwzending (external from this viewpoint)
      *
      * @param string $value
      * @return $this
      */
-    public function setBoekuwzendingExternalOrderId($value){
-        return $this->setData(static::FIELD_BOEKUWZENDING_EXTERNAL_ORDER_ID, $value);        
+    public function setBoekuwzendingExternalOrderId($value): Order
+    {
+        return $this->setData(static::FIELD_BOEKUWZENDING_EXTERNAL_ORDER_ID, $value);
     }
 
     /**
@@ -65,8 +64,9 @@ class Order extends AbstractModel implements OrderInterface
      * @param string $value
      * @return $this
      */
-    public function setSalesOrderId($value) {
-        return $this->setData(static::FIELD_SALES_ORDER_ID, $value);        
+    public function setSalesOrderId($value)
+    {
+        return $this->setData(static::FIELD_SALES_ORDER_ID, $value);
     }
 
     /**
@@ -74,7 +74,8 @@ class Order extends AbstractModel implements OrderInterface
      *
      * @return string
      */
-    public function getSalesOrderId() {
-        return $this->getData(static::FIELD_SALES_ORDER_ID);        
+    public function getSalesOrderId()
+    {
+        return $this->getData(static::FIELD_SALES_ORDER_ID);
     }
 }
