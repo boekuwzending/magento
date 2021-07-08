@@ -2,31 +2,36 @@
 
 namespace Boekuwzending\Magento\Controller\Webhook;
 
-use Magento\Framework\App\Action\Action;
-use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 
-class Label extends Action
+class Label implements HttpGetActionInterface
 {
     /**
      * @var JsonFactory
      */
     private $resultJsonFactory;
+    /**
+     * @var RequestInterface
+     */
+    private $request;
 
     /**
      * Handle constructor.
-     * @param Context $context
+     * @param RequestInterface $request
+     * @param JsonFactory $resultJsonFactory
      */
-    public function __construct(Context $context, JsonFactory $resultJsonFactory)
+    public function __construct(RequestInterface $request, JsonFactory $resultJsonFactory)
     {
-        parent::__construct($context);
         $this->resultJsonFactory = $resultJsonFactory;
+        $this->request = $request;
     }
 
     public function execute()
     {
-        if ($this->getRequest()->getParam('test')) {
+        if ($this->request->getParam('test')) {
             return $this->ok();
         }
 
