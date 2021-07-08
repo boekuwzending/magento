@@ -14,10 +14,10 @@ ARG GID=1000
 RUN apt-get update && apt-get install -y software-properties-common curl
 
 RUN add-apt-repository ppa:ondrej/php
-RUN apt-get update && apt-get install -y php
+RUN apt-get update && apt-get install -y php7.4
 RUN apt-get update && apt-get install -y \
-    php-mysql php-xml php-intl php-curl \
-    php-bcmath php-gd php-mbstring php-soap php-zip
+    php7.4-mysql php7.4-xml php7.4-intl php7.4-curl \
+    php7.4-bcmath php7.4-gd php7.4-mbstring php7.4-soap php7.4-zip
 
 # Magento doesn't support Composer 2 and the apt version is too old.
 RUN cd ~ && \
