@@ -1,6 +1,11 @@
 <?php
 namespace Boekuwzending\Magento\Service;
 
+use Boekuwzending\Client;
+use Boekuwzending\ClientFactory;
+use Boekuwzending\Exception\AuthorizationFailedException;
+use Boekuwzending\Exception\RequestFailedException;
+use Exception;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
 
@@ -9,16 +14,18 @@ use Boekuwzending\Resource\Contact;
 use Boekuwzending\Resource\Order;
 use Boekuwzending\Resource\OrderLine;
 use Boekuwzending\Magento\Utils\AddressParser;
+use Magento\Store\Model\ScopeInterface;
+use Psr\Log\LoggerInterface;
 
 class BoekuwzendingClient implements IBoekuwzendingClient
 {
     /**
-    * @var \Psr\Log\LoggerInterface
+    * @var LoggerInterface
     */
     private $logger;
 
     /**
-    * @var \Boekuwzending\Client
+    * @var Client|null
     */
     private $client;
 
@@ -37,37 +44,58 @@ class BoekuwzendingClient implements IBoekuwzendingClient
     private $clientId;
 
     /**
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param LoggerInterface $logger
      * @param ScopeConfigInterface $scopeConfig
      * @param AddressParser $addressParser
      */
     public function __construct(
-        \Psr\Log\LoggerInterface $logger,
+        LoggerInterface $logger,
         ScopeConfigInterface $scopeConfig,
         AddressParser $addressParser 
     ) {
         $this->logger = $logger;
-        $this->clientId = $scopeConfig->getValue("carriers/boekuwzending/clientId", \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-        $secret = $scopeConfig->getValue("carriers/boekuwzending/clientSecret", \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-        $staging = $scopeConfig->getValue("carriers/boekuwzending/testmode", \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        $this->clientId = $scopeConfig->getValue("carriers/boekuwzending/clientId", ScopeInterface::SCOPE_STORE);
+        $secret = $scopeConfig->getValue("carriers/boekuwzending/clientSecret", ScopeInterface::SCOPE_STORE);
+        $staging = $scopeConfig->getValue("carriers/boekuwzending/testmode", ScopeInterface::SCOPE_STORE);
         
-        $this->environment = $staging ? \Boekuwzending\Client::ENVIRONMENT_STAGING : \Boekuwzending\Client::ENVIRONMENT_LIVE;
-        $this->client = \Boekuwzending\ClientFactory::build($this->clientId, $secret, $this->environment);
+        $this->environment = $staging ? Client::ENVIRONMENT_STAGING : Client::ENVIRONMENT_LIVE;
 
+        // Not configured, keep null (and check later).
+        if (empty($this->clientId) || empty($secret)) {
+            return;
+        }
+
+        $this->client = ClientFactory::build($this->clientId, $secret, $this->environment);
         $this->addressParser = $addressParser;
     }
 
     public function isStaging() : bool {
-        return $this->environment == \Boekuwzending\Client::ENVIRONMENT_STAGING;
+        return Client::ENVIRONMENT_STAGING === $this->environment;
     }
 
-    public function getOrderById(string $id) : \Boekuwzending\Resource\Order {
+    /**
+     * @throws AuthorizationFailedException
+     * @throws RequestFailedException
+     * @throws Exception
+     */
+    public function getOrderById(string $id) : ?Order
+    {
+        $this->logger->info("BoekuwzendingClient::getOrderById(): " . $id . ", clientId: " . $this->clientId);
+        $this->throwIfNotConfigured();
+
         return $this->client->order->get($id);
     }
 
-    public function createOrder(MagentoOrder $order) : \Boekuwzending\Resource\Order {
+    /**
+     * @throws AuthorizationFailedException
+     * @throws RequestFailedException
+     * @throws Exception
+     */
+    public function createOrder(MagentoOrder $order) : ?Order
+    {
         $this->logger->info("BoekuwzendingClient::createOrder(): " . $order->getId() . ", clientId: " . $this->clientId);
-        
+        $this->throwIfNotConfigured();
+
         // TODO: try-catch, status handling
         $buzOrder = $this->mapOrder($order);
         $buzOrder = $this->client->order->create($buzOrder);
@@ -77,7 +105,8 @@ class BoekuwzendingClient implements IBoekuwzendingClient
         return $buzOrder;
     }
 
-    private function mapOrder(MagentoOrder $order) : \Boekuwzending\Resource\Order {
+    private function mapOrder(MagentoOrder $order) : Order
+    {
         $buzOrder = new Order("0");
 
         $buzOrder->setExternalId($order->getId());
@@ -133,5 +162,15 @@ class BoekuwzendingClient implements IBoekuwzendingClient
         $buzOrder->setOrderLines($lines);
 
         return $buzOrder;
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function throwIfNotConfigured(): void
+    {
+        if (null === $this->client) {
+            throw new Exception("Client is not configured");
+        }
     }
 }
