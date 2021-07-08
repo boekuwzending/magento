@@ -58,13 +58,20 @@ class Label implements HttpGetActionInterface
             return $this->error(404, __('Not found')->render());
         }
 
+        return $this->ok($buzOrder);
+
         return $this->error(500, __('Not yet implemented')->render());
     }
 
-    private function ok(): Json
+    private function ok(?object $data): Json
     {
         $result = $this->resultJsonFactory->create();
         $result->setData(['success' => true]);
+
+        if (null !== $data) {
+            $result->setData(['data' => $data]);
+        }
+
         return $result;
     }
 

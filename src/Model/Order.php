@@ -2,6 +2,7 @@
 
 namespace Boekuwzending\Magento\Model;
 
+use JsonSerializable;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Registry;
 use Magento\Framework\Stdlib\DateTime\DateTime;
@@ -9,40 +10,40 @@ use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Boekuwzending\Magento\Api\Data\OrderInterface;
 
-class Order extends AbstractModel implements OrderInterface
+class Order extends AbstractModel implements OrderInterface, JsonSerializable
 {
     public const FIELD_BOEKUWZENDING_ORDER_ID = 'boekuwzending_order_id'; // PK
     public const FIELD_SALES_ORDER_ID = 'sales_order_id'; // FK
     public const FIELD_BOEKUWZENDING_EXTERNAL_ORDER_ID = 'boekuwzending_external_order_id';
 
     /**
-     * @param Context $context
-     * @param Registry $registry
-     * @param OrderFactory $orderFactory
-     * @param DateTime $dateTime
-     * @param AbstractResource $resource
-     * @param AbstractDb $resourceCollection
-     * @param array $data
+     * Do not touch - Magento/Symfony-specific. Everything breaks if you change it.
+     *
+     * @noinspection MagicMethodsValidityInspection
+     * @noinspection ReturnTypeCanBeDeclaredInspection
+     * @noinspection ClassConstantCanBeUsedInspection
      */
-    public function __construct(
-        Context $context,
-        Registry $registry,
-        DateTime $dateTime,
-        AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null,
-        array $data = []
-    )
+    protected function _construct()
     {
-        parent::__construct($context, $registry, $dateTime, $resource, $resourceCollection, $data);
-        $this->_init(__CLASS__);
+        $this->_init('Boekuwzending\Magento\Model\ResourceModel\Order');
+    }
+
+    /**
+     * Get the entity id.
+     *
+     * @return int
+     */
+    public function getEntityId(): int
+    {
+        return $this->getData(static::FIELD_BOEKUWZENDING_ORDER_ID);
     }
 
     /**
      * Get the id at Boekuwzending (external from this viewpoint)
      *
-     * @return string
+     * @return array|mixed|null
      */
-    public function getBoekuwzendingExternalOrderId() : mixed
+    public function getBoekuwzendingExternalOrderId(): string
     {
         return $this->getData(static::FIELD_BOEKUWZENDING_EXTERNAL_ORDER_ID);
     }
@@ -53,7 +54,7 @@ class Order extends AbstractModel implements OrderInterface
      * @param string $value
      * @return $this
      */
-    public function setBoekuwzendingExternalOrderId($value): Order
+    public function setBoekuwzendingExternalOrderId($value): OrderInterface
     {
         return $this->setData(static::FIELD_BOEKUWZENDING_EXTERNAL_ORDER_ID, $value);
     }
@@ -64,7 +65,7 @@ class Order extends AbstractModel implements OrderInterface
      * @param string $value
      * @return $this
      */
-    public function setSalesOrderId($value)
+    public function setSalesOrderId($value): OrderInterface
     {
         return $this->setData(static::FIELD_SALES_ORDER_ID, $value);
     }
@@ -74,8 +75,17 @@ class Order extends AbstractModel implements OrderInterface
      *
      * @return string
      */
-    public function getSalesOrderId()
+    public function getSalesOrderId(): string
     {
         return $this->getData(static::FIELD_SALES_ORDER_ID);
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            self::FIELD_BOEKUWZENDING_ORDER_ID => $this->getEntityId(),
+            self::FIELD_SALES_ORDER_ID => $this->getSalesOrderId(),
+            self::FIELD_BOEKUWZENDING_EXTERNAL_ORDER_ID => $this->getBoekuwzendingExternalOrderId()
+        ];
     }
 }
