@@ -6,10 +6,12 @@ use Boekuwzending\Magento\Api\OrderRepositoryInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Model\Convert\Order as ConvertOrder;
+use Magento\Sales\Model\Order\Shipment\TrackFactory;
 use Magento\Shipping\Model\ShipmentNotifier;
+use Magento\Sales\Api\OrderRepositoryInterface as MagentoOrderRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -20,7 +22,7 @@ use Psr\Log\LoggerInterface;
  *
  * @package Boekuwzending\Magento\Controller\Webhook
  */
-class Label implements HttpGetActionInterface
+class Label implements HttpPostActionInterface
 {
     /**
      * @var JsonFactory
@@ -39,7 +41,7 @@ class Label implements HttpGetActionInterface
      */
     private $orderRepository;
     /**
-     * @var \Magento\Sales\Api\OrderRepositoryInterface
+     * @var MagentoOrderRepositoryInterface
      */
     private $magentoOrderRepository;
     /**
@@ -47,25 +49,31 @@ class Label implements HttpGetActionInterface
      */
     private $orderConverter;
     /**
-     * @var Magento\Shipping\Model\ShipmentNotifier
+     * @var ShipmentNotifier
      */
     private $shipmentNotifier;
+    /**
+     * @var TrackFactory
+     */
+    private $trackFactory;
 
     /**
      * Handle constructor.
      * @param LoggerInterface $logger
      * @param RequestInterface $request
      * @param OrderRepositoryInterface $orderRepository
-     * @param \Magento\Sales\Api\OrderRepositoryInterface $magentoOrderRepository
+     * @param MagentoOrderRepositoryInterface $magentoOrderRepository
      * @param ConvertOrder $orderConverter
+     * @param TrackFactory $trackFactory
      * @param ShipmentNotifier $shipmentNotifier
      * @param JsonFactory $resultJsonFactory
      */
     public function __construct(LoggerInterface $logger,
                                 RequestInterface $request,
                                 OrderRepositoryInterface $orderRepository,
-                                \Magento\Sales\Api\OrderRepositoryInterface $magentoOrderRepository,
+                                MagentoOrderRepositoryInterface $magentoOrderRepository,
                                 ConvertOrder $orderConverter,
+                                TrackFactory $trackFactory,
                                 ShipmentNotifier $shipmentNotifier,
                                 JsonFactory $resultJsonFactory)
     {
@@ -76,6 +84,7 @@ class Label implements HttpGetActionInterface
         $this->orderConverter = $orderConverter;
         $this->resultJsonFactory = $resultJsonFactory;
         $this->shipmentNotifier = $shipmentNotifier;
+        $this->trackFactory = $trackFactory;
     }
 
     /**
@@ -83,12 +92,21 @@ class Label implements HttpGetActionInterface
      */
     public function execute()
     {
+        // So the platform can call us
         if ($this->request->getParam('test')) {
             return $this->ok();
         }
 
-        $orderId = $this->request->getParam('id');
-        $this->logger->info("Webhook::Label::execute() called for ID '" . $orderId . "'");
+        // TODO: how to document what body we expect?
+        $postBody = json_decode($this->request->getContent(), true, 2, JSON_THROW_ON_ERROR);
+
+        $orderId = $postBody["orderId"];
+        $trackingNumber = $postBody["trackingNumber"];
+        $carrierCode = $postBody["carrierCode"];
+        $carrierTitle = $postBody["carrierTitle"];
+
+        $logString = "Webhook::Label::execute() called for order ID '" . $orderId . "', carrier '" . $carrierTitle . "' ('" . $carrierCode . "'), tracking number: '" . $trackingNumber . "')";
+        $this->logger->info($logString);
 
         $buzOrder = $this->orderRepository->getByExternalOrderId($orderId);
         if (null === $buzOrder) {
@@ -115,9 +133,9 @@ class Label implements HttpGetActionInterface
             $shipment->addItem($shipmentItem);
         }
 
-        // Register shipment
+        $track = $this->trackFactory->create()->setNumber($trackingNumber)->setCarrierCode($carrierCode)->setTitle($carrierTitle);
+        $shipment->addTrack($track);
         $shipment->register();
-
         $shipment->getOrder()->setIsInProcess(true);
 
         try {
