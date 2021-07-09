@@ -1,16 +1,14 @@
 <?php
 
-
 namespace Boekuwzending\Magento\Service;
-
 
 use Boekuwzending\Magento\Api\OrderRepositoryInterface;
 use Boekuwzending\Magento\Utils\Constants;
 use Exception;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NotFoundException;
-use Magento\Sales\Api\Data\ShipmentCommentCreationInterface;
 use Magento\Sales\Model\Convert\Order as ConvertOrder;
+use Magento\Sales\Model\Order\Shipment;
 use Magento\Sales\Model\Order\Shipment\TrackFactory;
 use Magento\Shipping\Model\ShipmentNotifier;
 use Magento\Sales\Api\OrderRepositoryInterface as MagentoOrderRepositoryInterface;
@@ -61,7 +59,6 @@ class OrderShipper implements OrderShipperInterface
      * @param MagentoOrderRepositoryInterface $magentoOrderRepository
      * @param ConvertOrder $orderConverter
      * @param TrackFactory $trackFactory
-     * @param ShipmentCommentCreationInterface $commentCreation
      * @param ShipmentNotifier $shipmentNotifier
      */
     public function __construct(LoggerInterface $logger,
@@ -69,7 +66,6 @@ class OrderShipper implements OrderShipperInterface
                                 MagentoOrderRepositoryInterface $magentoOrderRepository,
                                 ConvertOrder $orderConverter,
                                 TrackFactory $trackFactory,
-                                ShipmentCommentCreationInterface $commentCreation,
                                 ShipmentNotifier $shipmentNotifier)
     {
         $this->logger = $logger;
@@ -77,7 +73,6 @@ class OrderShipper implements OrderShipperInterface
         $this->magentoOrderRepository = $magentoOrderRepository;
         $this->orderConverter = $orderConverter;
         $this->trackFactory = $trackFactory;
-        $this->commentCreation = $commentCreation;
         $this->shipmentNotifier = $shipmentNotifier;
     }
 
@@ -87,11 +82,11 @@ class OrderShipper implements OrderShipperInterface
      * @param string $carrierTitle
      * @param string $trackingNumber
      *
-     * @return mixed
+     * @return Shipment
      * @throws LocalizedException
      * @throws NotFoundException
      */
-    public function ship(string $orderId, string $carrierCode, string $carrierTitle, string $trackingNumber)
+    public function ship(string $orderId, string $carrierCode, string $carrierTitle, string $trackingNumber): Shipment
     {
         $logPrefix = __METHOD__ . " ";
 
@@ -113,7 +108,7 @@ class OrderShipper implements OrderShipperInterface
             throw new LocalizedException($errorString, null, Constants::ERROR_ORDER_ALREADY_SHIPPED);
         }
 
-        /** @var  $shipment */
+        /** @var Shipment $shipment */
         $shipment = $this->orderConverter->toShipment($magentoOrder);
 
         // Add all non-virtual items that still need to be shipped (i.e. not on a prior shipment) to the shipment
@@ -134,15 +129,15 @@ class OrderShipper implements OrderShipperInterface
         $track = $this->trackFactory->create()->setNumber($trackingNumber)->setCarrierCode($carrierCode)->setTitle($carrierTitle);
         $shipment->addTrack($track);
 
+        // Don't notify the customer and don't show this comment on the front (false, false).
+        $shipment->addComment(__("Shipment created automatically by Boekuwzending label creation"), false, false);
+
         // Order status stuff
-        $this->commentCreation->
         $shipment->register();
         $shipment->getOrder()->setIsInProcess(true);
 
         try {
             // Save created shipment and order
-
-            /* TEMP: don't save
             $shipment->save();
             $shipment->getOrder()->save();
 
@@ -150,7 +145,6 @@ class OrderShipper implements OrderShipperInterface
             $this->shipmentNotifier->notify($shipment);
 
             $shipment->save();
-            */
 
             return $shipment;
         } catch (Exception $ex) {
