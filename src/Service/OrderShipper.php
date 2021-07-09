@@ -90,7 +90,7 @@ class OrderShipper implements OrderShipperInterface
 
         $buzOrder = $this->orderRepository->getByExternalOrderId($orderId);
         if (null === $buzOrder) {
-            $errorString = __("Order '%s' not found", $orderId);
+            $errorString = __("Order '%1' not found", $orderId);
             $this->logger->error($logPrefix . $errorString);
             throw new NotFoundException($errorString);
         }
@@ -98,7 +98,7 @@ class OrderShipper implements OrderShipperInterface
         $magentoOrder = $this->magentoOrderRepository->get($buzOrder->getSalesOrderId());
 
         if (!$magentoOrder->canShip()) {
-            $errorString = __("Can't ship order '%s': nothing to ship", $magentoOrder->getId());
+            $errorString = __("Can't ship order '%1': nothing to ship", $magentoOrder->getId());
             $this->logger->error($logPrefix . $errorString);
             throw new LocalizedException(__($errorString));
         }
