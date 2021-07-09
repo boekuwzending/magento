@@ -5,8 +5,10 @@ use Boekuwzending\Client;
 use Boekuwzending\ClientFactory;
 use Boekuwzending\Exception\AuthorizationFailedException;
 use Boekuwzending\Exception\RequestFailedException;
+use Boekuwzending\Magento\Utils\Constants;
 use Exception;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Model\Order as MagentoOrder;
 
 use Boekuwzending\Resource\Address;
@@ -54,9 +56,9 @@ class BoekuwzendingClient implements BoekuwzendingClientInterface
         AddressParser $addressParser 
     ) {
         $this->logger = $logger;
-        $this->clientId = $scopeConfig->getValue("carriers/boekuwzending/clientId", ScopeInterface::SCOPE_STORE);
-        $secret = $scopeConfig->getValue("carriers/boekuwzending/clientSecret", ScopeInterface::SCOPE_STORE);
-        $staging = $scopeConfig->getValue("carriers/boekuwzending/testmode", ScopeInterface::SCOPE_STORE);
+        $this->clientId = $scopeConfig->getValue(Constants::CONFIG_CLIENTID_PATH, ScopeInterface::SCOPE_STORE);
+        $secret = $scopeConfig->getValue(Constants::CONFIG_CLIENTSECRET_PATH, ScopeInterface::SCOPE_STORE);
+        $staging = $scopeConfig->getValue(Constants::CONFIG_TESTMODE_PATH, ScopeInterface::SCOPE_STORE);
         
         $this->environment = $staging ? Client::ENVIRONMENT_STAGING : Client::ENVIRONMENT_LIVE;
 
@@ -165,12 +167,12 @@ class BoekuwzendingClient implements BoekuwzendingClientInterface
     }
 
     /**
-     * @throws Exception
+     * @throws LocalizedException
      */
     private function throwIfNotConfigured(): void
     {
         if (null === $this->client) {
-            throw new Exception("Client is not configured");
+            throw new LocalizedException(__("Client is not configured"), null, Constants::ERROR_CONFIGURATION_DATA_MISSING);
         }
     }
 }

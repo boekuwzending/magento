@@ -3,6 +3,9 @@
 namespace Boekuwzending\Magento\Controller\Webhook;
 
 use Boekuwzending\Magento\Service\OrderShipperInterface;
+use Boekuwzending\Magento\Utils\Constants;
+use Exception;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
@@ -17,20 +20,8 @@ use Psr\Log\LoggerInterface;
  *
  * @package Boekuwzending\Magento\Controller\Webhook
  */
-class Label implements HttpPostActionInterface
+class Label extends WebhookBase implements HttpPostActionInterface
 {
-    /**
-     * @var JsonFactory
-     */
-    private $resultJsonFactory;
-    /**
-     * @var RequestInterface
-     */
-    private $request;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
     /**
      * @var OrderShipperInterface
      */
@@ -40,55 +31,56 @@ class Label implements HttpPostActionInterface
      * Label constructor.
      * @param LoggerInterface $logger
      * @param RequestInterface $request
+     * @param ScopeConfigInterface $scopeConfig
      * @param OrderShipperInterface $orderShipper
      * @param JsonFactory $resultJsonFactory
      */
     public function __construct(LoggerInterface $logger,
                                 RequestInterface $request,
-                                OrderShipperInterface $orderShipper,
-                                JsonFactory $resultJsonFactory)
+                                JsonFactory $resultJsonFactory,
+                                ScopeConfigInterface $scopeConfig,
+                                OrderShipperInterface $orderShipper)
     {
-        $this->logger = $logger;
-        $this->request = $request;
+        parent::__construct($logger, $request, $resultJsonFactory, $scopeConfig);
+
         $this->orderShipper = $orderShipper;
-        $this->resultJsonFactory = $resultJsonFactory;
     }
 
     /**
      * Handles the POST /boekuwzending/webhook/label call.
      *
      * @return Json
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function execute(): Json
     {
-        $logPrefix = "Webhook::Label::execute() ";
+        $logPrefix = "Webhook::" . __METHOD__ . " ";
 
-        // Assume a happy flow.
-        $response = $this->resultJsonFactory->create();
-        $response->setHttpResponseCode(200);
-        $response->setData(['success' => true]);
+        $response = $this->createResponse();
 
-        // Immediately return a positive response so the platform can call us to test a webhook.
-        // TODO: only after HMAC validation?
-        if ($this->request->getParam('test')) {
-            return $response;
+        $requestBody = $this->deserializeRequestBody();
+
+        if (null === $requestBody) {
+            return $this->badRequest($response, "Could not parse JSON request body");
         }
 
         // TODO: how to document what body we expect?
-        try {
-            $requestBody = $this->request->getContent();
-            $this->logger->debug($logPrefix . "JSON: " . $requestBody);
-            $postBody = json_decode($requestBody, true, 2, JSON_THROW_ON_ERROR);
+        if (!array_key_exists('orderId', $requestBody)) {
+            return $this->badRequest($response, "Missing key 'orderId'");
         }
-        catch (\JsonException $ex) {
-            $this->logger->error($logPrefix . "error parsing JSON: " . $ex);
-            return $this->badRequest($response);
-        }
+        // ...
 
-        $orderId = $postBody["orderId"];
-        $carrierCode = $postBody["carrierCode"];
-        $carrierTitle = $postBody["carrierTitle"];
-        $trackingNumber = $postBody["trackingNumber"];
+        $orderId = $requestBody["orderId"];
+        $carrierCode = $requestBody["carrierCode"];
+        $carrierTitle = $requestBody["carrierTitle"];
+        $trackingNumber = $requestBody["trackingNumber"];
+
+        $requestHmac = $this->getRequestHmac();
+        $controlHmac = $this->calculateHmac([ $orderId, $carrierCode, $carrierTitle, $trackingNumber ]);
+
+        if ($controlHmac !== $requestHmac) {
+            return $this->badRequest($response, "Invalid HMAC");
+        }
 
         try {
             $shipment = $this->orderShipper->ship($orderId, $carrierCode, $carrierTitle, $trackingNumber);
@@ -100,29 +92,15 @@ class Label implements HttpPostActionInterface
         {
             return $this->notFound($response);
         }
-        catch (\Exception $ex)
+        catch (Exception $ex)
         {
-            $logString = "Error creating shipment for order ID '" . $orderId . "': " . $ex;
-            $this->logger->error("Webhook::Label::execute() " . $logString);
-            return $this->badRequest($response);
+            $message = $ex->getMessage();
+
+            if (Constants::ERROR_ORDER_ALREADY_SHIPPED === $ex->getCode()) {
+                $message = "Order already fully shipped";
+            }
+
+            return $this->badRequest($response, $message);
         }
-    }
-
-    private function badRequest(Json $response): Json
-    {
-        return $this->error($response, 400);
-    }
-
-    private function notFound(Json $response): Json
-    {
-        return $this->error($response, 404);
-    }
-
-    private function error(Json $response, int $code): Json
-    {
-        $response->setHttpResponseCode($code);
-        // TODO: ProblemResponse?
-        $response->setData(['success' => false]);
-        return $response;
     }
 }

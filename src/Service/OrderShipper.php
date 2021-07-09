@@ -5,9 +5,11 @@ namespace Boekuwzending\Magento\Service;
 
 
 use Boekuwzending\Magento\Api\OrderRepositoryInterface;
+use Boekuwzending\Magento\Utils\Constants;
 use Exception;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NotFoundException;
+use Magento\Sales\Api\Data\ShipmentCommentCreationInterface;
 use Magento\Sales\Model\Convert\Order as ConvertOrder;
 use Magento\Sales\Model\Order\Shipment\TrackFactory;
 use Magento\Shipping\Model\ShipmentNotifier;
@@ -47,6 +49,10 @@ class OrderShipper implements OrderShipperInterface
      * @var ShipmentNotifier
      */
     private $shipmentNotifier;
+    /**
+     * @var ShipmentCommentCreationInterface
+     */
+    private $commentCreation;
 
     /**
      * OrderShipper constructor.
@@ -55,6 +61,7 @@ class OrderShipper implements OrderShipperInterface
      * @param MagentoOrderRepositoryInterface $magentoOrderRepository
      * @param ConvertOrder $orderConverter
      * @param TrackFactory $trackFactory
+     * @param ShipmentCommentCreationInterface $commentCreation
      * @param ShipmentNotifier $shipmentNotifier
      */
     public function __construct(LoggerInterface $logger,
@@ -62,6 +69,7 @@ class OrderShipper implements OrderShipperInterface
                                 MagentoOrderRepositoryInterface $magentoOrderRepository,
                                 ConvertOrder $orderConverter,
                                 TrackFactory $trackFactory,
+                                ShipmentCommentCreationInterface $commentCreation,
                                 ShipmentNotifier $shipmentNotifier)
     {
         $this->logger = $logger;
@@ -69,6 +77,7 @@ class OrderShipper implements OrderShipperInterface
         $this->magentoOrderRepository = $magentoOrderRepository;
         $this->orderConverter = $orderConverter;
         $this->trackFactory = $trackFactory;
+        $this->commentCreation = $commentCreation;
         $this->shipmentNotifier = $shipmentNotifier;
     }
 
@@ -78,12 +87,13 @@ class OrderShipper implements OrderShipperInterface
      * @param string $carrierTitle
      * @param string $trackingNumber
      *
+     * @return mixed
      * @throws LocalizedException
      * @throws NotFoundException
      */
     public function ship(string $orderId, string $carrierCode, string $carrierTitle, string $trackingNumber)
     {
-        $logPrefix = "OrderShipper::ship() ";
+        $logPrefix = __METHOD__ . " ";
 
         $logString = $logPrefix . "called for order ID '" . $orderId . "', carrier '" . $carrierTitle . "' ('" . $carrierCode . "'), tracking number: '" . $trackingNumber . "')";
         $this->logger->info($logString);
@@ -100,9 +110,10 @@ class OrderShipper implements OrderShipperInterface
         if (!$magentoOrder->canShip()) {
             $errorString = __("Can't ship order '%1': nothing to ship", $magentoOrder->getId());
             $this->logger->error($logPrefix . $errorString);
-            throw new LocalizedException(__($errorString));
+            throw new LocalizedException($errorString, null, Constants::ERROR_ORDER_ALREADY_SHIPPED);
         }
 
+        /** @var  $shipment */
         $shipment = $this->orderConverter->toShipment($magentoOrder);
 
         // Add all non-virtual items that still need to be shipped (i.e. not on a prior shipment) to the shipment
@@ -115,7 +126,7 @@ class OrderShipper implements OrderShipperInterface
             // Convert and add to shipment
             $quantityToShip = $orderItem->getQtyToShip();
             $shipmentItem = $this->orderConverter->itemToShipmentItem($orderItem)->setQty($quantityToShip);
-            $this->logger->debug($logPrefix . "shipping " . $quantityToShip . " of item " . $orderItem->getId());
+            $this->logger->debug($logPrefix . "shipping " . $quantityToShip . "/" . $orderItem->getQtyOrdered() . " of item " . $orderItem->getId());
             $shipment->addItem($shipmentItem);
         }
 
@@ -124,11 +135,14 @@ class OrderShipper implements OrderShipperInterface
         $shipment->addTrack($track);
 
         // Order status stuff
+        $this->commentCreation->
         $shipment->register();
         $shipment->getOrder()->setIsInProcess(true);
 
         try {
             // Save created shipment and order
+
+            /* TEMP: don't save
             $shipment->save();
             $shipment->getOrder()->save();
 
@@ -136,8 +150,13 @@ class OrderShipper implements OrderShipperInterface
             $this->shipmentNotifier->notify($shipment);
 
             $shipment->save();
-        } catch (Exception $e) {
-            throw new LocalizedException(__($e->getMessage()));
+            */
+
+            return $shipment;
+        } catch (Exception $ex) {
+            $logString = __("Error creating shipment for order ID '%1': %2", $orderId, $ex->getMessage());
+            $this->logger->error($logPrefix . $logString);
+            throw new LocalizedException($logString);
         }
     }
 }

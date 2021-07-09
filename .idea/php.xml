@@ -41,7 +41,6 @@
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php80" />
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-ctype" />
       <path value="$PROJECT_DIR$/vendor/monolog/monolog" />
-      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php73" />
       <path value="$PROJECT_DIR$/vendor/magento/zendframework1" />
       <path value="$PROJECT_DIR$/vendor/magento/framework" />
       <path value="$PROJECT_DIR$/vendor/laminas/laminas-crypt" />
