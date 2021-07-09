@@ -10,6 +10,7 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NotFoundException;
 use Psr\Log\LoggerInterface;
 
@@ -20,7 +21,7 @@ use Psr\Log\LoggerInterface;
  *
  * @package Boekuwzending\Magento\Controller\Webhook
  */
-class Label extends WebhookBase implements HttpPostActionInterface
+class LabelCreated extends WebhookBase implements HttpPostActionInterface
 {
     /**
      * @var OrderShipperInterface
@@ -50,25 +51,29 @@ class Label extends WebhookBase implements HttpPostActionInterface
      * Handles the POST /boekuwzending/webhook/label call.
      *
      * @return Json
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function execute(): Json
     {
-        $logPrefix = "Webhook::" . __METHOD__ . " ";
-
-        $response = $this->createResponse();
-
         $requestBody = $this->deserializeRequestBody();
 
         if (null === $requestBody) {
-            return $this->badRequest($response, "Could not parse JSON request body");
+            return $this->badRequest(__("Could not parse JSON request body"));
         }
 
         // TODO: how to document what body we expect?
         if (!array_key_exists('orderId', $requestBody)) {
-            return $this->badRequest($response, "Missing key 'orderId'");
+            return $this->badRequest(__("Missing request body key '%1'", 'orderId'));
         }
-        // ...
+        if (!array_key_exists('carrierCode', $requestBody)) {
+            return $this->badRequest(__("Missing request body key '%1'", 'carrierCode'));
+        }
+        if (!array_key_exists('carrierTitle', $requestBody)) {
+            return $this->badRequest(__("Missing request body key '%1'", 'carrierTitle'));
+        }
+        if (!array_key_exists('trackingNumber', $requestBody)) {
+            return $this->badRequest(__("Missing request body key '%1'", 'trackingNumber'));
+        }
 
         $orderId = $requestBody["orderId"];
         $carrierCode = $requestBody["carrierCode"];
@@ -79,28 +84,28 @@ class Label extends WebhookBase implements HttpPostActionInterface
         $controlHmac = $this->calculateHmac([ $orderId, $carrierCode, $carrierTitle, $trackingNumber ]);
 
         if ($controlHmac !== $requestHmac) {
-            return $this->badRequest($response, "Invalid HMAC");
+            return $this->unauthorized(__("Invalid HMAC"));
         }
 
         try {
             $shipment = $this->orderShipper->ship($orderId, $carrierCode, $carrierTitle, $trackingNumber);
-            $this->logger->info($logPrefix . "shipment created: " . $shipment->getId());
+            $this->logger->info(__METHOD__ . " shipment created: " . $shipment->getId());
 
-            return $response;
+            return $this->ok();
         }
         catch (NotFoundException $ex)
         {
-            return $this->notFound($response);
+            return $this->notFound(__("Order '%1' not found", $orderId));
         }
         catch (Exception $ex)
         {
             $message = $ex->getMessage();
 
             if (Constants::ERROR_ORDER_ALREADY_SHIPPED === $ex->getCode()) {
-                $message = "Order already fully shipped";
+                $message = __("Order already fully shipped");
             }
 
-            return $this->badRequest($response, $message);
+            return $this->badRequest($message);
         }
     }
 }

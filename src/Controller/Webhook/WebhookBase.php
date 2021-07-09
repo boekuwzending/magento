@@ -79,6 +79,8 @@ abstract class WebhookBase
     }
 
     /**
+     * Calculate the HMAC of the given fields, concatenated with '|', signed by the client ID and private key concatenated directly.
+     *
      * @throws LocalizedException
      */
     protected function calculateHmac(array $fields): string
@@ -91,7 +93,7 @@ abstract class WebhookBase
         }
 
         if (null === $fields || empty($fields)) {
-            throw new LocalizedException(__("Module is not configured for receiving webhooks"), null, Constants::ERROR_);
+            throw new LocalizedException(__("Cannot calculate an HMAC for an empty request"));
         }
 
         $hmacData = implode("|", $fields);
@@ -107,7 +109,7 @@ abstract class WebhookBase
      *
      * @return Json
      */
-    protected function createResponse(): Json
+    protected function ok(): Json
     {
         $response = $this->resultJsonFactory->create();
         $response->setHttpResponseCode(200);
@@ -116,41 +118,51 @@ abstract class WebhookBase
     }
 
     /**
-     * Modifies and returns the given response to a 400 Bad Request status, optionally with the provided message in its body.
+     * Creates a 400 Bad Request response, optionally with the provided message in its body.
      *
-     * @param Json $response
      * @param string|null $message
      * @return Json
      */
-    protected function badRequest(Json $response, ?string $message = null): Json
+    protected function badRequest(?string $message = null): Json
     {
-        return $this->error($response, 400, $message);
+        return $this->error(400, $message);
     }
 
     /**
-     * Modifies and returns the given response to a 404 Not Found status.
+     * Creates a 401 Unauthorized response, optionally with the provided message in its body.
      *
-     * @param Json $response
+     * @param string|null $message
      * @return Json
      */
-    protected function notFound(Json $response): Json
+    protected function unauthorized(?string $message = null): Json
     {
-        return $this->error($response, 404);
+        return $this->error(401, $message);
     }
 
     /**
-     * Modifies and returns the given response into an error response with the provided status code and optional message in its body.
+     * Creates a 404 Not Found response and optional message in its body.
      *
-     * @param Json $response
+     * @param string|null $message
+     * @return Json
+     */
+    protected function notFound(?string $message = null): Json
+    {
+        return $this->error(404, $message);
+    }
+
+    /**
+     * Creates an error response with the provided status code and optional message in its body.
+     *
      * @param int $code
      * @param string|null $message
      * @return Json
      */
-    protected function error(Json $response, int $code, ?string $message = null): Json
+    protected function error(int $code, ?string $message = null): Json
     {
+        $response = $this->ok();
+
         $response->setHttpResponseCode($code);
 
-        // TODO: ProblemResponse?
         $response->setData([
             'status' => $code,
             'success' => false,

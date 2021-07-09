@@ -23,28 +23,26 @@ class Test extends WebhookBase implements HttpPostActionInterface
      */
     public function execute(): Json
     {
-        $logPrefix = "Webhook::" . __METHOD__ . " ";
-
-        $response = $this->createResponse();
+        $this->logger->info(__METHOD__ . " called");
 
         $requestBody = $this->deserializeRequestBody();
 
         // TODO: how to document what body we expect?
         if (!array_key_exists('test', $requestBody)) {
-            return $this->badRequest($response, "Missing key 'test'");
+            return $this->badRequest(__("Missing request body key '%1'", 'test'));
         }
 
         if ('test' !== $requestBody['test']) {
-            return $this->badRequest($response, "Invalid data for key 'test'");
+            return $this->badRequest(__("Invalid data for key '%1'", 'test'));
         }
 
         $requestHmac = $this->getRequestHmac();
         $controlHmac = $this->calculateHmac([ $requestBody["test"] ]);
 
         if ($controlHmac !== $requestHmac) {
-            return $this->badRequest($response, "Invalid HMAC");
+            return $this->unauthorized(__("Invalid HMAC"));
         }
 
-        return $response;
+        return $this->ok();
     }
 }
