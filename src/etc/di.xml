@@ -3,6 +3,9 @@
     <!-- Boekuwzending Client -->
     <preference for="Boekuwzending\Magento\Service\BoekuwzendingClientInterface" type="Boekuwzending\Magento\Service\BoekuwzendingClient" />
 
+    <!-- Label webhook handler -->
+    <preference for="Boekuwzending\Magento\Service\OrderShipperInterface" type="Boekuwzending\Magento\Service\OrderShipper" />
+
     <!-- Order entity -->
     <preference for="Boekuwzending\Magento\Api\Data\OrderInterface" type="Boekuwzending\Magento\Model\Order" />
     <preference for="Boekuwzending\Magento\Api\OrderRepositoryInterface" type="Boekuwzending\Magento\Model\OrderRepository" />
