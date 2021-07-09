@@ -4,7 +4,7 @@ namespace Boekuwzending\Magento\Service;
 use Boekuwzending\Resource\Order;
 use Magento\Sales\Model\Order as MagentoOrder;
 
-interface IBoekuwzendingClient {
+interface BoekuwzendingClientInterface {
     /**
      * Returns whether the module is configured for staging mode. False means live mode.
      * @return bool

@@ -17,7 +17,7 @@ use Boekuwzending\Magento\Utils\AddressParser;
 use Magento\Store\Model\ScopeInterface;
 use Psr\Log\LoggerInterface;
 
-class BoekuwzendingClient implements IBoekuwzendingClient
+class BoekuwzendingClient implements BoekuwzendingClientInterface
 {
     /**
     * @var LoggerInterface

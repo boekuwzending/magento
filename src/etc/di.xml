@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <!-- Boekuwzending Client -->
-    <preference for="Boekuwzending\Magento\Service\IBoekuwzendingClient" type="Boekuwzending\Magento\Service\BoekuwzendingClient" />
-    
+    <preference for="Boekuwzending\Magento\Service\BoekuwzendingClientInterface" type="Boekuwzending\Magento\Service\BoekuwzendingClient" />
+
     <!-- Order entity -->
     <preference for="Boekuwzending\Magento\Api\Data\OrderInterface" type="Boekuwzending\Magento\Model\Order" />
     <preference for="Boekuwzending\Magento\Api\OrderRepositoryInterface" type="Boekuwzending\Magento\Model\OrderRepository" />

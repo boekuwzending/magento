@@ -2,7 +2,7 @@
 
 namespace Boekuwzending\Magento\Plugin\Order;
 
-use Boekuwzending\Magento\Service\IBoekuwzendingClient;
+use Boekuwzending\Magento\Service\BoekuwzendingClientInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Sales\Api\Data\OrderExtensionFactory;
 use Magento\Sales\Api\Data\OrderInterface;
@@ -26,7 +26,7 @@ class OrderRepository
      */
     private $boekuwzendingOrderRepository;
     /**
-     * @var IBoekuwzendingClient
+     * @var BoekuwzendingClientInterface
      */
     private $client;
     /**
@@ -44,7 +44,7 @@ class OrderRepository
         Collection $statusCollection,
         LoggerInterface $logger,
         \Boekuwzending\Magento\Api\OrderRepositoryInterface $boekuwzendingOrderRepo,
-        IBoekuwzendingClient $client
+        BoekuwzendingClientInterface $client
     )
     {
         $this->scopeConfig = $scopeConfig;
