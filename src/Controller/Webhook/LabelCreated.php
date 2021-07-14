@@ -103,6 +103,11 @@ class LabelCreated extends WebhookBase implements HttpPostActionInterface
 
             if (Constants::ERROR_ORDER_ALREADY_SHIPPED === $ex->getCode()) {
                 $message = __("Order already fully shipped");
+                $this->logger->info(__METHOD__ . " " . $message);
+            }
+            else
+            {
+                $this->logger->error(__METHOD__ . " exception creating shipment: " . $ex);
             }
 
             return $this->badRequest($message);
