@@ -60,7 +60,7 @@ abstract class WebhookBase
             /** @noinspection PhpUndefinedMethodInspection - it's in there */
             $requestBody = $this->request->getContent();
             $this->logger->debug(__METHOD__ . ": JSON: " . $requestBody);
-            return json_decode($requestBody, true, 2, JSON_THROW_ON_ERROR);
+            return json_decode($requestBody, true, 3, JSON_THROW_ON_ERROR);
         } catch (JsonException $ex) {
             $this->logger->error(__METHOD__ . ": error parsing JSON: " . $ex);
             return null;
@@ -68,13 +68,22 @@ abstract class WebhookBase
     }
 
     /**
-     * Reads the `Hmac` request header.
+     * Reads the `Hmac` from the request.
      */
-    protected function getRequestHmac(): ?string
+    protected function getRequestHmac(array $requestBody): ?string
     {
-        /** @noinspection PhpPossiblePolymorphicInvocationInspection */
-        $requestHmac = $this->request->getHeader(self::HMAC_HEADER_NAME);
-        $this->logger->debug(__METHOD__ . ": request HMAC: " . $requestHmac);
+        if (false === array_key_exists('meta', $requestBody) || false === array_key_exists('hmac', $requestBody['meta'])) {
+            return null;
+        }
+
+        // From header:
+        /* * @noinspection PhpPossiblePolymorphicInvocationInspection */
+        //$requestHmac = $this->request->getHeader(self::HMAC_HEADER_NAME);
+
+        // From body:
+        $requestHmac = $requestBody['meta']['hmac'];
+
+        $this->logger->debug(sprintf("%s: request HMAC: %s", __METHOD__, $requestHmac));
         return $requestHmac;
     }
 
@@ -82,6 +91,7 @@ abstract class WebhookBase
      * Calculate the HMAC of the given fields, concatenated with '|', signed by the client ID and private key concatenated directly.
      *
      * @throws LocalizedException
+     * @throws JsonException
      */
     protected function calculateHmac(array $fields): string
     {
@@ -96,7 +106,10 @@ abstract class WebhookBase
             throw new LocalizedException(__("Cannot calculate an HMAC for an empty request"));
         }
 
-        $hmacData = implode("|", $fields);
+        $hmacData = json_encode($fields, JSON_THROW_ON_ERROR);
+
+        $this->logger->debug(sprintf('Data for HMAC: %s, ClientID: %s', $hmacData, $clientId));
+
         $calculatedHmac = hash_hmac("sha256", $hmacData, $clientId . $secret);
 
         $this->logger->debug(__METHOD__ . ": calculated HMAC: " . $calculatedHmac . ", from data: " . $hmacData);

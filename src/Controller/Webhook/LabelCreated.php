@@ -5,11 +5,12 @@ namespace Boekuwzending\Magento\Controller\Webhook;
 use Boekuwzending\Magento\Service\OrderShipperInterface;
 use Boekuwzending\Magento\Utils\Constants;
 use Exception;
+use JsonException;
+use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NotFoundException;
 use Psr\Log\LoggerInterface;
@@ -51,7 +52,9 @@ class LabelCreated extends WebhookBase implements HttpPostActionInterface
      * Handles the POST /boekuwzending/webhook/label call.
      *
      * @return Json
+     *
      * @throws LocalizedException
+     * @throws JsonException
      */
     public function execute(): Json
     {
@@ -61,27 +64,39 @@ class LabelCreated extends WebhookBase implements HttpPostActionInterface
             return $this->badRequest(__("Could not parse JSON request body"));
         }
 
+        $data = $requestBody['data'];
+
         // TODO: how to document what body we expect?
-        if (!array_key_exists('orderId', $requestBody)) {
-            return $this->badRequest(__("Missing request body key '%1'", 'orderId'));
+        if (!array_key_exists('entity_id', $data)) {
+            return $this->badRequest(__("Missing request body key '%1'", 'data.entity_id'));
         }
-        if (!array_key_exists('carrierCode', $requestBody)) {
-            return $this->badRequest(__("Missing request body key '%1'", 'carrierCode'));
+        if (!array_key_exists('order_id', $data)) {
+            return $this->badRequest(__("Missing request body key '%1'", 'data.order_id'));
         }
-        if (!array_key_exists('carrierTitle', $requestBody)) {
-            return $this->badRequest(__("Missing request body key '%1'", 'carrierTitle'));
+        if (!array_key_exists('carrier_code', $data)) {
+            return $this->badRequest(__("Missing request body key '%1'", 'data.carrier_code'));
         }
-        if (!array_key_exists('trackingNumber', $requestBody)) {
-            return $this->badRequest(__("Missing request body key '%1'", 'trackingNumber'));
+        if (!array_key_exists('carrier_title', $data)) {
+            return $this->badRequest(__("Missing request body key '%1'", 'data.carrier_title'));
+        }
+        if (!array_key_exists('tracking_number', $data)) {
+            return $this->badRequest(__("Missing request body key '%1'", 'data.tracking_number'));
         }
 
-        $orderId = $requestBody["orderId"];
-        $carrierCode = $requestBody["carrierCode"];
-        $carrierTitle = $requestBody["carrierTitle"];
-        $trackingNumber = $requestBody["trackingNumber"];
+        $entityId = $data["entity_id"];
+        $orderId = $data["order_id"];
+        $carrierCode = $data["carrier_code"];
+        $carrierTitle = $data["carrier_title"];
+        $trackingNumber = $data["tracking_number"];
 
-        $requestHmac = $this->getRequestHmac();
-        $controlHmac = $this->calculateHmac([ $orderId, $carrierCode, $carrierTitle, $trackingNumber ]);
+        $requestHmac = $this->getRequestHmac($requestBody);
+        $controlHmac = $this->calculateHmac([
+            'entity_id' => $entityId,
+            'order_id' => $orderId,
+            'carrier_code' => $carrierCode,
+            'carrier_title' => $carrierTitle,
+            'tracking_number' => $trackingNumber
+        ]);
 
         if ($controlHmac !== $requestHmac) {
             return $this->unauthorized(__("Invalid HMAC"));
@@ -92,21 +107,15 @@ class LabelCreated extends WebhookBase implements HttpPostActionInterface
             $this->logger->info(__METHOD__ . " shipment created: " . $shipment->getId());
 
             return $this->ok();
-        }
-        catch (NotFoundException $ex)
-        {
+        } catch (NotFoundException $ex) {
             return $this->notFound(__("Order '%1' not found", $orderId));
-        }
-        catch (Exception $ex)
-        {
+        } catch (Exception $ex) {
             $message = $ex->getMessage();
 
             if (Constants::ERROR_ORDER_ALREADY_SHIPPED === $ex->getCode()) {
                 $message = __("Order already fully shipped");
                 $this->logger->info(__METHOD__ . " " . $message);
-            }
-            else
-            {
+            } else {
                 $this->logger->error(__METHOD__ . " exception creating shipment: " . $ex);
             }
 

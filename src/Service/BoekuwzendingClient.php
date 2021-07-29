@@ -144,7 +144,7 @@ class BoekuwzendingClient implements BoekuwzendingClientInterface
         /* TODO: https://devdocs.magento.com/guides/v2.4/graphql/interfaces/order-item-interface.html:
             
             * Which quantity? (quantity_ordered - quantity_returned - quantity_canceled)? quantity_shipped?
-            * WWhich price? Does that account for discounts?
+            * Which price? Does that account for discounts?
         */
 
         foreach ($order->getAllVisibleItems() as $item) {
