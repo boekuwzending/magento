@@ -18,10 +18,6 @@ class OrderRepository
     private $logger;
 
     /**
-     * @var Collection
-     */
-    private $statusCollection;
-    /**
      * @var \Boekuwzending\Magento\Api\OrderRepositoryInterface
      */
     private $boekuwzendingOrderRepository;
@@ -35,20 +31,19 @@ class OrderRepository
     private $scopeConfig;
 
     /**
-     * @param Collection $statusCollection
+     * @param ScopeConfigInterface $scopeConfig
      * @param LoggerInterface $logger
      * @param \Boekuwzending\Magento\Api\OrderRepositoryInterface $boekuwzendingOrderRepo
+     * @param BoekuwzendingClientInterface $client
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        Collection $statusCollection,
         LoggerInterface $logger,
         \Boekuwzending\Magento\Api\OrderRepositoryInterface $boekuwzendingOrderRepo,
         BoekuwzendingClientInterface $client
     )
     {
         $this->scopeConfig = $scopeConfig;
-        $this->statusCollection = $statusCollection;
         $this->logger = $logger;
         $this->boekuwzendingOrderRepository = $boekuwzendingOrderRepo;
         $this->client = $client;

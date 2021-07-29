@@ -146,7 +146,6 @@ class BoekuwzendingClient implements BoekuwzendingClientInterface
             * Which quantity? (quantity_ordered - quantity_returned - quantity_canceled)? quantity_shipped?
             * Which price? Does that account for discounts?
         */
-
         foreach ($order->getAllVisibleItems() as $item) {
             
             $qty = $item->getQtyOrdered();
@@ -155,7 +154,7 @@ class BoekuwzendingClient implements BoekuwzendingClientInterface
 
             $line->setExternalId($item->getId());
             $line->setDescription($item->getName());
-            $line->setQuantity(intval($qty));
+            $line->setQuantity((int)$qty);
             $line->setValue($item->getPrice());
         
             $lines[] = $line;
