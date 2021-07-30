@@ -70,8 +70,11 @@ class LabelCreated extends WebhookBase implements HttpPostActionInterface
         if (!array_key_exists('entity_id', $data)) {
             return $this->badRequest(__("Missing request body key '%1'", 'data.entity_id'));
         }
-        if (!array_key_exists('order_id', $data)) {
-            return $this->badRequest(__("Missing request body key '%1'", 'data.order_id'));
+        if (!array_key_exists('shipment_id', $data)) {
+            return $this->badRequest(__("Missing request body key '%1'", 'data.shipment_id'));
+        }
+        if (!array_key_exists('external_order_id', $data)) {
+            return $this->badRequest(__("Missing request body key '%1'", 'data.external_order_id'));
         }
         if (!array_key_exists('carrier_code', $data)) {
             return $this->badRequest(__("Missing request body key '%1'", 'data.carrier_code'));
@@ -84,7 +87,8 @@ class LabelCreated extends WebhookBase implements HttpPostActionInterface
         }
 
         $entityId = $data["entity_id"];
-        $orderId = $data["order_id"];
+        $shipmentId = $data["shipment_id"];
+        $externalOrderId = $data["external_order_id"];
         $carrierCode = $data["carrier_code"];
         $carrierTitle = $data["carrier_title"];
         $trackingNumber = $data["tracking_number"];
@@ -92,7 +96,8 @@ class LabelCreated extends WebhookBase implements HttpPostActionInterface
         $requestHmac = $this->getRequestHmac($requestBody);
         $controlHmac = $this->calculateHmac([
             'entity_id' => $entityId,
-            'order_id' => $orderId,
+            'shipment_id' => $shipmentId,
+            'external_order_id' => $externalOrderId,
             'carrier_code' => $carrierCode,
             'carrier_title' => $carrierTitle,
             'tracking_number' => $trackingNumber
