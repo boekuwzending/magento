@@ -108,12 +108,12 @@ class LabelCreated extends WebhookBase implements HttpPostActionInterface
         }
 
         try {
-            $shipment = $this->orderShipper->ship($orderId, $carrierCode, $carrierTitle, $trackingNumber);
+            $shipment = $this->orderShipper->ship($externalOrderId, $carrierCode, $carrierTitle, $trackingNumber);
             $this->logger->info(__METHOD__ . " shipment created: " . $shipment->getId());
 
             return $this->ok();
         } catch (NotFoundException $ex) {
-            return $this->notFound(__("Order '%1' not found", $orderId));
+            return $this->notFound(__("Order '%1' not found", $externalOrderId));
         } catch (Exception $ex) {
             $message = $ex->getMessage();
 
