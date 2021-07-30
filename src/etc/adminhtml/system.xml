@@ -35,6 +35,10 @@
                     <source_model>Magento\Sales\Model\Config\Source\Order\Status</source_model>
                 </field>
 
+                <field id="shipOrderOnLabelCreated" translate="label" type="select" sortOrder="55" showInDefault="1" showInWebsite="1" showInStore="0" >
+                    <label>Ship Order on Label Creation</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="sallowspecific" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0" >
                     <label>Ship to Applicable Countries</label>
                     <frontend_class>shipping-applicable-country</frontend_class>

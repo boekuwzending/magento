@@ -8,6 +8,7 @@ use Magento\Sales\Api\Data\OrderExtensionFactory;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
+use Magento\Store\Model\ScopeInterface;
 use Psr\Log\LoggerInterface;
 
 class OrderRepository
@@ -63,7 +64,7 @@ class OrderRepository
         try {
             $magentoOrderId = $result->getEntityId();
 
-            $triggerStates = $this->scopeConfig->getValue("carriers/boekuwzending/triggerOnOrderStatus", \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+            $triggerStates = $this->scopeConfig->getValue("carriers/boekuwzending/triggerOnOrderStatus", ScopeInterface::SCOPE_STORE);
             $triggerStates = explode(",", $triggerStates ?? "");
 
             // Skip non-"processing" states (or whatever is configured)

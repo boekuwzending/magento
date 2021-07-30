@@ -10,4 +10,5 @@ class Constants
     public const CONFIG_CLIENTID_PATH = "carriers/boekuwzending/clientId";
     public const CONFIG_CLIENTSECRET_PATH = "carriers/boekuwzending/clientSecret";
     public const CONFIG_TESTMODE_PATH = "carriers/boekuwzending/testmode";
+    public const CONFIG_WEBHOOK_LABELCREATED_SHIPORDER = "carriers/boekuwzending/shipOrderOnLabelCreated";
 }

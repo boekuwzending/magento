@@ -16,9 +16,7 @@ use Magento\Framework\Exception\NotFoundException;
 use Psr\Log\LoggerInterface;
 
 /**
- * Class Label
- *
- * This label webhook gets called by the platform when a label is made for one of our orders.
+ * This /labelCreated webhook gets called by the platform when a label is made for one of our orders.
  *
  * @package Boekuwzending\Magento\Controller\Webhook
  */
@@ -49,7 +47,7 @@ class LabelCreated extends WebhookBase implements HttpPostActionInterface
     }
 
     /**
-     * Handles the POST /boekuwzending/webhook/label call.
+     * Handles the POST /boekuwzending/webhook/labelCreated call.
      *
      * @return Json
      *
@@ -108,6 +106,18 @@ class LabelCreated extends WebhookBase implements HttpPostActionInterface
         }
 
         try {
+            $createShipment = $this->scopeConfig->getValue(Constants::CONFIG_WEBHOOK_LABELCREATED_SHIPORDER);
+
+            if ($createShipment !== "1")
+            {
+                $this->logger->info(vsprintf('%s(): call for external order Id "%s" was semantically correct, but setting is disabled.', [
+                    __METHOD__,
+                    $externalOrderId,
+                ]));
+
+                return $this->ok();
+            }
+
             $shipment = $this->orderShipper->ship($externalOrderId, $carrierCode, $carrierTitle, $trackingNumber);
             $this->logger->info(__METHOD__ . " shipment created: " . $shipment->getId());
 
