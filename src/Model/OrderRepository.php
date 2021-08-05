@@ -153,11 +153,11 @@ class OrderRepository implements OrderRepositoryInterface
      */
     public function getByExternalOrderId(string $externalOrderId): ?OrderInterface
     {
-        $oneOrZero = $this->getByFieldWithValue(Order::FIELD_BOEKUWZENDING_EXTERNAL_ORDER_ID, $externalOrderId);
+        $maybeOrder = $this->getByFieldWithValue(Order::FIELD_BOEKUWZENDING_EXTERNAL_ORDER_ID, $externalOrderId);
 
-        return (null === $oneOrZero || empty($oneOrZero))
+        return (null === $maybeOrder || empty($maybeOrder))
             ? null
-            : $oneOrZero[array_key_first($oneOrZero)];
+            : $maybeOrder[array_key_first($maybeOrder)];
     }
 
     // Repository boilerplate below
@@ -175,10 +175,8 @@ class OrderRepository implements OrderRepositoryInterface
         /** @var SearchResults $list */
         $list = $this->getList($searchCriteria->create());
 
-        if ($list->getTotalCount()) {
-            /** @noinspection PhpUnnecessaryLocalVariableInspection - for debugging */
-            $items = $list->getItems();
-            return $items;
+        if ($list->getTotalCount() >= 0) {
+            return $list->getItems();
         }
 
         return null;

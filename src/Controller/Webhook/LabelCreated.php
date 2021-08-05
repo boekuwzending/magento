@@ -29,6 +29,7 @@ class LabelCreated extends WebhookBase implements HttpPostActionInterface
 
     /**
      * Label constructor.
+     *
      * @param LoggerInterface $logger
      * @param RequestInterface $request
      * @param ScopeConfigInterface $scopeConfig
@@ -59,37 +60,37 @@ class LabelCreated extends WebhookBase implements HttpPostActionInterface
         $requestBody = $this->deserializeRequestBody();
 
         if (null === $requestBody) {
-            return $this->badRequest(__("Could not parse JSON request body"));
+            return $this->badRequest(__('Could not parse JSON request body'));
         }
 
         $data = $requestBody['data'];
 
         // TODO: how to document what body we expect?
         if (!array_key_exists('entity_id', $data)) {
-            return $this->badRequest(__("Missing request body key '%1'", 'data.entity_id'));
+            return $this->missingRequestBodyKey('data.entity_id');
         }
         if (!array_key_exists('shipment_id', $data)) {
-            return $this->badRequest(__("Missing request body key '%1'", 'data.shipment_id'));
+            return $this->missingRequestBodyKey('data.shipment_id');
         }
         if (!array_key_exists('external_order_id', $data)) {
-            return $this->badRequest(__("Missing request body key '%1'", 'data.external_order_id'));
+            return $this->missingRequestBodyKey('data.external_order_id');
         }
         if (!array_key_exists('carrier_code', $data)) {
-            return $this->badRequest(__("Missing request body key '%1'", 'data.carrier_code'));
+            return $this->missingRequestBodyKey('data.carrier_code');
         }
         if (!array_key_exists('carrier_title', $data)) {
-            return $this->badRequest(__("Missing request body key '%1'", 'data.carrier_title'));
+            return $this->missingRequestBodyKey('data.carrier_title');
         }
         if (!array_key_exists('tracking_number', $data)) {
-            return $this->badRequest(__("Missing request body key '%1'", 'data.tracking_number'));
+            return $this->missingRequestBodyKey('data.tracking_number');
         }
 
-        $entityId = $data["entity_id"];
-        $shipmentId = $data["shipment_id"];
-        $externalOrderId = $data["external_order_id"];
-        $carrierCode = $data["carrier_code"];
-        $carrierTitle = $data["carrier_title"];
-        $trackingNumber = $data["tracking_number"];
+        $entityId = $data['entity_id'];
+        $shipmentId = $data['shipment_id'];
+        $externalOrderId = $data['external_order_id'];
+        $carrierCode = $data['carrier_code'];
+        $carrierTitle = $data['carrier_title'];
+        $trackingNumber = $data['tracking_number'];
 
         $requestHmac = $this->getRequestHmac($requestBody);
         $controlHmac = $this->calculateHmac([
@@ -102,14 +103,13 @@ class LabelCreated extends WebhookBase implements HttpPostActionInterface
         ]);
 
         if ($controlHmac !== $requestHmac) {
-            return $this->unauthorized(__("Invalid HMAC"));
+            return $this->unauthorized(__('Invalid HMAC'));
         }
 
         try {
             $createShipment = $this->scopeConfig->getValue(Constants::CONFIG_WEBHOOK_LABELCREATED_SHIPORDER);
 
-            if ($createShipment !== "1")
-            {
+            if ($createShipment !== "1") {
                 $this->logger->info(vsprintf('%s(): call for external order Id "%s" was semantically correct, but setting is disabled.', [
                     __METHOD__,
                     $externalOrderId,
@@ -119,19 +119,19 @@ class LabelCreated extends WebhookBase implements HttpPostActionInterface
             }
 
             $shipment = $this->orderShipper->ship($externalOrderId, $carrierCode, $carrierTitle, $trackingNumber);
-            $this->logger->info(__METHOD__ . " shipment created: " . $shipment->getId());
+            $this->logger->info(sprintf('%s(): shipment created: %s', __METHOD__, $shipment->getId()));
 
             return $this->ok();
         } catch (NotFoundException $ex) {
-            return $this->notFound(__("Order '%1' not found", $externalOrderId));
+            return $this->notFound(__('Order "%1" not found', $externalOrderId));
         } catch (Exception $ex) {
             $message = $ex->getMessage();
 
             if (Constants::ERROR_ORDER_ALREADY_SHIPPED === $ex->getCode()) {
-                $message = __("Order already fully shipped");
-                $this->logger->info(__METHOD__ . " " . $message);
+                $message = __('Order already fully shipped');
+                $this->logger->info(sprintf('%s %s', __METHOD__, $message));
             } else {
-                $this->logger->error(__METHOD__ . " exception creating shipment: " . $ex);
+                $this->logger->error(sprintf('%s(): exception creating shipment: %s', __METHOD__, $ex));
             }
 
             return $this->badRequest($message);

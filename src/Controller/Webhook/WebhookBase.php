@@ -20,14 +20,17 @@ abstract class WebhookBase
      * @var LoggerInterface
      */
     protected $logger;
+
     /**
      * @var RequestInterface
      */
     protected $request;
+
     /**
      * @var JsonFactory
      */
     protected $resultJsonFactory;
+
     /**
      * @var ScopeConfigInterface
      */
@@ -59,10 +62,10 @@ abstract class WebhookBase
         try {
             /** @noinspection PhpUndefinedMethodInspection - it's in there */
             $requestBody = $this->request->getContent();
-            $this->logger->debug(__METHOD__ . ": JSON: " . $requestBody);
+            $this->logger->debug(sprintf('%s(): JSON: %s', __METHOD__, $requestBody));
             return json_decode($requestBody, true, 3, JSON_THROW_ON_ERROR);
         } catch (JsonException $ex) {
-            $this->logger->error(__METHOD__ . ": error parsing JSON: " . $ex);
+            $this->logger->error(sprintf('%s(): error parsing JSON: %s', __METHOD__, $ex));
             return null;
         }
     }
@@ -83,7 +86,7 @@ abstract class WebhookBase
         // From body:
         $requestHmac = $requestBody['meta']['hmac'];
 
-        $this->logger->debug(sprintf("%s: request HMAC: %s", __METHOD__, $requestHmac));
+        $this->logger->debug(sprintf('%s: request HMAC: %s', __METHOD__, $requestHmac));
         return $requestHmac;
     }
 
@@ -127,7 +130,16 @@ abstract class WebhookBase
         $response = $this->resultJsonFactory->create();
         $response->setHttpResponseCode(200);
         $response->setData(['success' => true]);
+
         return $response;
+    }
+
+    /**
+     * Returns a 400 Bad Request complaining about a missing request body key.
+     */
+    protected function missingRequestBodyKey(string $key): Json
+    {
+        return $this->badRequest(__('Missing request body key "%1"', $key));
     }
 
     /**
@@ -173,9 +185,7 @@ abstract class WebhookBase
     protected function error(int $code, ?string $message = null): Json
     {
         $response = $this->ok();
-
         $response->setHttpResponseCode($code);
-
         $response->setData([
             'status' => $code,
             'success' => false,
