@@ -66,22 +66,22 @@ class LabelCreated extends WebhookBase implements HttpPostActionInterface
         $data = $requestBody['data'];
 
         // TODO: how to document what body we expect?
-        if (!array_key_exists('entity_id', $data)) {
+        if (false === array_key_exists('entity_id', $data)) {
             return $this->missingRequestBodyKey('data.entity_id');
         }
-        if (!array_key_exists('shipment_id', $data)) {
+        if (false === array_key_exists('shipment_id', $data)) {
             return $this->missingRequestBodyKey('data.shipment_id');
         }
-        if (!array_key_exists('external_order_id', $data)) {
+        if (false === array_key_exists('external_order_id', $data)) {
             return $this->missingRequestBodyKey('data.external_order_id');
         }
-        if (!array_key_exists('carrier_code', $data)) {
+        if (false === array_key_exists('carrier_code', $data)) {
             return $this->missingRequestBodyKey('data.carrier_code');
         }
-        if (!array_key_exists('carrier_title', $data)) {
+        if (false === array_key_exists('carrier_title', $data)) {
             return $this->missingRequestBodyKey('data.carrier_title');
         }
-        if (!array_key_exists('tracking_number', $data)) {
+        if (false === array_key_exists('tracking_number', $data)) {
             return $this->missingRequestBodyKey('data.tracking_number');
         }
 

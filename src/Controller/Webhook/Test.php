@@ -28,7 +28,7 @@ class Test extends WebhookBase implements HttpPostActionInterface
         $requestBody = $this->deserializeRequestBody();
 
         // TODO: how to document what body we expect?
-        if (!array_key_exists('test', $requestBody)) {
+        if (false === array_key_exists('test', $requestBody)) {
             return $this->missingRequestBodyKey('test');
         }
 

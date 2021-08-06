@@ -79,14 +79,10 @@ abstract class WebhookBase
             return null;
         }
 
-        // From header:
-        /* * @noinspection PhpPossiblePolymorphicInvocationInspection */
-        //$requestHmac = $this->request->getHeader(self::HMAC_HEADER_NAME);
-
-        // From body:
         $requestHmac = $requestBody['meta']['hmac'];
 
         $this->logger->debug(sprintf('%s: request HMAC: %s', __METHOD__, $requestHmac));
+
         return $requestHmac;
     }
 
