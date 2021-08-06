@@ -1,7 +1,7 @@
 <?php
 namespace Boekuwzending\Magento\Controller\Adminhtml\Order;
 
-use Boekuwzending\Magento\Service\IBoekuwzendingClient;
+use Boekuwzending\Magento\Service\BoekuwzendingClientInterface;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\RequestInterface;
@@ -37,7 +37,7 @@ class CreateOrder extends Action
     private $resultJsonFactory;
     
     /**
-    * @var IBoekuwzendingClient
+    * @var BoekuwzendingClientInterface
     */
     private $client;
 
@@ -51,7 +51,7 @@ class CreateOrder extends Action
      * @param Context $context
      * @param OrderRepositoryInterface $magentoOrderRepository,
      * @param JsonFactory $resultJsonFactory
-     * @param IBoekuwzendingClient $client
+     * @param BoekuwzendingClientInterface $client
      * @param BoekuwzendingOrderRepositoryInterface $boekuwzendingOrderRepository
      */
     public function __construct(
@@ -60,7 +60,7 @@ class CreateOrder extends Action
         OrderRepositoryInterface $magentoOrderRepository,
         Order $orderResourceModel,
         JsonFactory $resultJsonFactory,
-        IBoekuwzendingClient $client,
+        BoekuwzendingClientInterface $client,
         BoekuwzendingOrderRepositoryInterface $boekuwzendingOrderRepository
     ) {
         parent::__construct($context);

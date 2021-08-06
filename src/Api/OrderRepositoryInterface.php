@@ -12,13 +12,19 @@ interface OrderRepositoryInterface
      * @param int $orderId
      * @return OrderInterface[]|null
      */
-    public function getByOrderId(int $orderId);
+    public function getByOrderId(int $orderId): ?array;
 
     /**
      * Create a new order entity.
      *
      * @param array $data
-     * @return Data\OrderInterface
+     * @return OrderInterface
      */
-    public function create(array $data = []): Data\OrderInterface;
+    public function create(array $data = []): OrderInterface;
+
+    /**
+     * @param string $externalOrderId
+     * @return OrderInterface
+     */
+    public function getByExternalOrderId(string $externalOrderId): ?OrderInterface;
 }

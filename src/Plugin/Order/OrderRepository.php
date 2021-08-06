@@ -2,12 +2,13 @@
 
 namespace Boekuwzending\Magento\Plugin\Order;
 
-use Boekuwzending\Magento\Service\IBoekuwzendingClient;
+use Boekuwzending\Magento\Service\BoekuwzendingClientInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Sales\Api\Data\OrderExtensionFactory;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\ResourceModel\Order\Status\Collection;
+use Magento\Store\Model\ScopeInterface;
 use Psr\Log\LoggerInterface;
 
 class OrderRepository
@@ -18,15 +19,11 @@ class OrderRepository
     private $logger;
 
     /**
-     * @var Collection
-     */
-    private $statusCollection;
-    /**
      * @var \Boekuwzending\Magento\Api\OrderRepositoryInterface
      */
     private $boekuwzendingOrderRepository;
     /**
-     * @var IBoekuwzendingClient
+     * @var BoekuwzendingClientInterface
      */
     private $client;
     /**
@@ -35,20 +32,19 @@ class OrderRepository
     private $scopeConfig;
 
     /**
-     * @param Collection $statusCollection
+     * @param ScopeConfigInterface $scopeConfig
      * @param LoggerInterface $logger
      * @param \Boekuwzending\Magento\Api\OrderRepositoryInterface $boekuwzendingOrderRepo
+     * @param BoekuwzendingClientInterface $client
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        Collection $statusCollection,
         LoggerInterface $logger,
         \Boekuwzending\Magento\Api\OrderRepositoryInterface $boekuwzendingOrderRepo,
-        IBoekuwzendingClient $client
+        BoekuwzendingClientInterface $client
     )
     {
         $this->scopeConfig = $scopeConfig;
-        $this->statusCollection = $statusCollection;
         $this->logger = $logger;
         $this->boekuwzendingOrderRepository = $boekuwzendingOrderRepo;
         $this->client = $client;
@@ -68,7 +64,7 @@ class OrderRepository
         try {
             $magentoOrderId = $result->getEntityId();
 
-            $triggerStates = $this->scopeConfig->getValue("carriers/boekuwzending/triggerOnOrderStatus", \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+            $triggerStates = $this->scopeConfig->getValue("carriers/boekuwzending/triggerOnOrderStatus", ScopeInterface::SCOPE_STORE);
             $triggerStates = explode(",", $triggerStates ?? "");
 
             // Skip non-"processing" states (or whatever is configured)

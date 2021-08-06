@@ -12,7 +12,7 @@ interface OrderInterface
      *
      * @return string
      */
-    public function getBoekuwzendingExternalOrderId();
+    public function getBoekuwzendingExternalOrderId(): string;
     
     /**
      * Set the id at Boekuwzending (external from this viewpoint)
@@ -20,14 +20,14 @@ interface OrderInterface
      * @param string $value
      * @return $this
      */
-    public function setBoekuwzendingExternalOrderId($value);
+    public function setBoekuwzendingExternalOrderId($value): OrderInterface;
 
     /**
      * Get the Magento order id
      *
      * @return string
      */
-    public function getSalesOrderId();
+    public function getSalesOrderId(): string;
 
     /**
      * Set the Magento order id
@@ -35,5 +35,5 @@ interface OrderInterface
      * @param string $value
      * @return $this
      */
-    public function setSalesOrderId($value);
+    public function setSalesOrderId($value): OrderInterface;
 }

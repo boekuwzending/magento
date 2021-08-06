@@ -40,5 +40,5 @@ Wanneer het is ingeschakeld, kun je vanuit VS Code met F5 attachen. Breakpoints 
 * Ga naar Sales -> Delivery Methods
 * Scroll naar "Boekuwzending"
 
-Zie [docs.boekuwzending.com/plugin/magento](https://docs.boekuwzending.com/plugin/magento) voor meer informatie.
+Zie [docs.boekuwzending.com/plugin/magento/](https://docs.boekuwzending.com/plugin/magento/) voor meer informatie.
 

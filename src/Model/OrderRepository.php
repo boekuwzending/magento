@@ -2,9 +2,12 @@
 
 namespace Boekuwzending\Magento\Model;
 
+use Exception;
 use Magento\Framework\Api\Filter;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Api\SearchCriteriaInterface;
+use Magento\Framework\Api\SearchResults;
+use Magento\Framework\Api\SearchResultsInterface;
 use Magento\Framework\Api\SearchResultsInterfaceFactory;
 use Magento\Framework\Api\SortOrder;
 use Magento\Framework\Exception\CouldNotSaveException;
@@ -25,7 +28,7 @@ class OrderRepository implements OrderRepositoryInterface
      * @var SearchCriteriaBuilder
      */
     protected $searchCriteriaBuilder;
- 
+
     /**
      * @var OrderCollectionFactory
      */
@@ -35,24 +38,27 @@ class OrderRepository implements OrderRepositoryInterface
      * @var OrderFactory // Does not exist, instantiated by reflection.
      */
     protected $orderFactory;
-    
+
     /**
      * @var SearchResultsInterface
      */
     protected $searchResults;
 
     /**
-     * AbstractRepository constructor.
+     * OrderRepository constructor.
      *
      * @param SearchResultsInterfaceFactory $searchResultsFactory
-     * @param SearchCriteriaBuilder         $searchCriteriaBuilder
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param OrderCollectionFactory $collectionFactory
+     * @param OrderFactory $orderFactory
      */
     public function __construct(
         SearchResultsInterfaceFactory $searchResultsFactory,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         OrderCollectionFactory $collectionFactory,
         OrderFactory $orderFactory
-    ) {
+    )
+    {
         $this->searchResultsFactory = $searchResultsFactory;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->collectionFactory = $collectionFactory;
@@ -60,12 +66,12 @@ class OrderRepository implements OrderRepositoryInterface
     }
 
     /**
-     * Retrieve a list of Matrixrates.
+     * Retrieve a list of Orders.
      *
      * @param SearchCriteriaInterface $criteria
      * @return SearchResultsInterface
      */
-    public function getList(SearchCriteriaInterface $criteria)
+    public function getList(SearchCriteriaInterface $criteria): SearchResultsInterface
     {
         $searchResults = $this->getSearchResults($criteria);
         $collection = $this->collectionFactory->create();
@@ -82,18 +88,18 @@ class OrderRepository implements OrderRepositoryInterface
 
         return $searchResults;
     }
-    
+
     /**
      * @param OrderInterface $order
      *
      * @return OrderInterface
      * @throws CouldNotSaveException
      */
-    public function save(OrderInterface $order)
+    public function save(OrderInterface $order): OrderInterface
     {
         try {
             $order->save();
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             // @codingStandardsIgnoreLine
             throw new CouldNotSaveException(__($exception->getMessage()));
         }
@@ -107,7 +113,7 @@ class OrderRepository implements OrderRepositoryInterface
      * @return OrderInterface
      * @throws NoSuchEntityException
      */
-    public function getById($identifier)
+    public function getById($identifier): OrderInterface
     {
         $order = $this->orderFactory->create();
         $order->load($identifier);
@@ -135,9 +141,23 @@ class OrderRepository implements OrderRepositoryInterface
      *
      * @return OrderInterface[]|null
      */
-    public function getByOrderId(int $orderId)
+    public function getByOrderId(int $orderId): ?array
     {
         return $this->getByFieldWithValue(Order::FIELD_SALES_ORDER_ID, $orderId);
+    }
+
+    /**
+     * @param string $externalOrderId
+     *
+     * @return OrderInterface|null
+     */
+    public function getByExternalOrderId(string $externalOrderId): ?OrderInterface
+    {
+        $maybeOrder = $this->getByFieldWithValue(Order::FIELD_BOEKUWZENDING_EXTERNAL_ORDER_ID, $externalOrderId);
+
+        return (null === $maybeOrder || empty($maybeOrder))
+            ? null
+            : $maybeOrder[array_key_first($maybeOrder)];
     }
 
     // Repository boilerplate below
@@ -148,16 +168,15 @@ class OrderRepository implements OrderRepositoryInterface
      *
      * @return OrderInterface[]|null
      */
-    public function getByFieldWithValue($field, $value)
+    public function getByFieldWithValue($field, $value): ?array
     {
         $searchCriteria = $this->searchCriteriaBuilder->addFilter($field, $value);
 
-        /** @var \Magento\Framework\Api\SearchResults $list */
+        /** @var SearchResults $list */
         $list = $this->getList($searchCriteria->create());
 
-        if ($list->getTotalCount()) {
-            $items = $list->getItems();
-            return $items;
+        if ($list->getTotalCount() >= 0) {
+            return $list->getItems();
         }
 
         return null;
@@ -178,13 +197,13 @@ class OrderRepository implements OrderRepositoryInterface
     }
 
     /**
-     * @param FilterGroup        $filterGroup
+     * @param FilterGroup $filterGroup
      * @param AbstractCollection $collection
      */
     // @codingStandardsIgnoreLine
     protected function handleFilterGroups($filterGroup, $collection)
     {
-        $fields     = [];
+        $fields = [];
         $conditions = [];
 
         /** @var Filter[] $filters */
@@ -193,8 +212,8 @@ class OrderRepository implements OrderRepositoryInterface
         });
 
         foreach ($filters as $filter) {
-            $condition    = $filter->getConditionType() ? $filter->getConditionType() : 'eq';
-            $fields[]     = $filter->getField();
+            $condition = $filter->getConditionType() ? $filter->getConditionType() : 'eq';
+            $fields[] = $filter->getField();
             $conditions[] = [$condition => $filter->getValue()];
         }
 
@@ -205,7 +224,7 @@ class OrderRepository implements OrderRepositoryInterface
 
     /**
      * @param SearchCriteriaInterface $criteria
-     * @param                         $collection
+     * @param $collection
      */
     // @codingStandardsIgnoreLine
     protected function handleSortOrders(SearchCriteriaInterface $criteria, $collection)
@@ -224,5 +243,5 @@ class OrderRepository implements OrderRepositoryInterface
             );
         }
     }
-    
+
 }

@@ -8,6 +8,7 @@
                 <title>Boekuwzending</title>
                 <name>Boekuwzending</name>
                 <triggerOnOrderStatus>processing,complete</triggerOnOrderStatus>
+                <shipOrderOnLabelCreated>1</shipOrderOnLabelCreated>
                 <shipping_cost>5.99</shipping_cost>
                 <sallowspecific>0</sallowspecific>
                 <sort_order>15</sort_order>

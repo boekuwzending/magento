@@ -2,12 +2,12 @@
 namespace Boekuwzending\Magento\Block\Adminhtml\Order\View;
 
 use Boekuwzending\Magento\Api\OrderRepositoryInterface;
-use Boekuwzending\Magento\Service\IBoekuwzendingClient;
+use Boekuwzending\Magento\Service\BoekuwzendingClientInterface;
 
 class OrderShipmentView extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder
 {
     /**
-     * @var IBoekuwzendingClient
+     * @var BoekuwzendingClientInterface
      */
     protected $client;
 
@@ -25,7 +25,7 @@ class OrderShipmentView extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrd
      * @param array $data
      */
     public function __construct(
-        IBoekuwzendingClient $client,
+        BoekuwzendingClientInterface $client,
         OrderRepositoryInterface $orderRepository,
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\Registry $registry,
