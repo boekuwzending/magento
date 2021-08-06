@@ -95,7 +95,7 @@ class OrderShipper implements OrderShipperInterface
      */
     public function ship(string $orderId, string $carrierCode, string $carrierTitle, string $trackingNumber): Shipment
     {
-        $logPrefix = spritnf('%s():', __METHOD__);
+        $logPrefix = sprintf('%s():', __METHOD__);
 
         $logString = vsprintf('%s called for order ID "%s", carrier "%s" ("%s"), tracking number: "%s"', [
             $logPrefix,
