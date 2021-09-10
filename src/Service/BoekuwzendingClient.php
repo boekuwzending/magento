@@ -132,6 +132,11 @@ class BoekuwzendingClient implements BoekuwzendingClientInterface
         $street = $shippingAddress->getStreet();
         $parsedAddress = $this->addressParser->parseAddressLine($street[0]);
 
+        if (count($street) > 1) {
+            array_shift($street);
+            $address->setAddressLine2(implode(' ', $street));
+        }
+
         $address->setStreet($parsedAddress->street);
         $address->setNumber($parsedAddress->number);
         $address->setNumberAddition($parsedAddress->numberAddition);
