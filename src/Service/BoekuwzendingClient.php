@@ -9,7 +9,7 @@ use Boekuwzending\Exception\RequestFailedException;
 use Boekuwzending\Magento\Utils\AddressParser;
 use Boekuwzending\Magento\Utils\Constants;
 use Boekuwzending\Resource\Address;
-use Boekuwzending\Resource\Contact;
+use Boekuwzending\Resource\OrderContact;
 use Boekuwzending\Resource\Order;
 use Boekuwzending\Resource\OrderLine;
 use Exception;
@@ -119,10 +119,10 @@ class BoekuwzendingClient implements BoekuwzendingClientInterface
 
         $shippingAddress = $order->getShippingAddress();
 
-        $contact = new Contact();
+        $contact = new OrderContact();
         $contact->setName($shippingAddress->getName());
         $contact->setCompany($shippingAddress->getCompany());
-        $contact->setPhoneNumber($shippingAddress->getTelephone() ?? "");
+        $contact->setPlainPhoneNumber($shippingAddress->getTelephone() ?? "");
         $contact->setEmailAddress($shippingAddress->getEmail());
 
         $buzOrder->setShipToContact($contact);
