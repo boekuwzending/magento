@@ -55,7 +55,7 @@ services:
             - magento2:/magento2
             # Comment this line during Magento installation, directory must be empty
             - ./../../src:/magento2/app/code/Boekuwzending/Magento
-            - ./../../../php-sdk/:/magento2/vendor/boekuwzending/php-sdk/
+            #- ./../../../php-sdk/:/magento2/vendor/boekuwzending/php-sdk/
 
 # The volume that is used by the MySQL container
 volumes:
