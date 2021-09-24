@@ -21,5 +21,10 @@ class OrderCreateBeforeObserver implements ObserverInterface
         $shipTo->setStreet('Observerstreet');
         $shipTo->setNumber('NROBS');
         $shipTo->setNumberAddition('AddObs');
+
+        /** @var Magento\Sales\Model\Order $magentoOrder */
+        $magentoOrder = $observer->getData('magento_order');
+
+        dd($magentoOrder);
     }
 }

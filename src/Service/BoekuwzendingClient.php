@@ -112,7 +112,10 @@ class BoekuwzendingClient implements BoekuwzendingClientInterface
         // TODO: try-catch, status handling
         $buzOrder = $this->mapOrder($order);
 
-        $this->eventManager->dispatch('boekuwzending_order_create_before', ['boekuwzending_order' => $buzOrder]);
+        $this->eventManager->dispatch('boekuwzending_order_create_before', [
+            'boekuwzending_order' => $buzOrder,
+            'magento_order' => $order
+        ]);
 
         $buzOrder = $this->client->order->create($buzOrder);
 
