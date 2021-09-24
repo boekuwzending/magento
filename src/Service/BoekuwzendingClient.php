@@ -9,11 +9,12 @@ use Boekuwzending\Exception\RequestFailedException;
 use Boekuwzending\Magento\Utils\AddressParser;
 use Boekuwzending\Magento\Utils\Constants;
 use Boekuwzending\Resource\Address;
-use Boekuwzending\Resource\OrderContact;
 use Boekuwzending\Resource\Order;
+use Boekuwzending\Resource\OrderContact;
 use Boekuwzending\Resource\OrderLine;
 use Exception;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Event\ManagerInterface as EventManager;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Model\Order as MagentoOrder;
 use Magento\Store\Model\ScopeInterface;
@@ -40,10 +41,16 @@ class BoekuwzendingClient implements BoekuwzendingClientInterface
      * @var string
      */
     private $environment;
+
     /**
      * @var mixed
      */
     private $clientId;
+
+    /**
+     * @var EventManager
+     */
+    private $eventManager;
 
     /**
      * @param LoggerInterface $logger
@@ -51,12 +58,15 @@ class BoekuwzendingClient implements BoekuwzendingClientInterface
      * @param AddressParser $addressParser
      */
     public function __construct(
-        LoggerInterface $logger,
+        LoggerInterface      $logger,
         ScopeConfigInterface $scopeConfig,
-        AddressParser $addressParser
-    )
+        EventManager         $eventManager,
+        AddressParser        $addressParser)
     {
         $this->logger = $logger;
+        $this->eventManager = $eventManager;
+        $this->addressParser = $addressParser;
+
         $this->clientId = $scopeConfig->getValue(Constants::CONFIG_CLIENTID_PATH, ScopeInterface::SCOPE_STORE);
         $secret = $scopeConfig->getValue(Constants::CONFIG_CLIENTSECRET_PATH, ScopeInterface::SCOPE_STORE);
         $staging = $scopeConfig->getValue(Constants::CONFIG_TESTMODE_PATH, ScopeInterface::SCOPE_STORE);
@@ -69,7 +79,6 @@ class BoekuwzendingClient implements BoekuwzendingClientInterface
         }
 
         $this->client = ClientFactory::build($this->clientId, $secret, $this->environment);
-        $this->addressParser = $addressParser;
     }
 
     public function isStaging(): bool
@@ -102,6 +111,9 @@ class BoekuwzendingClient implements BoekuwzendingClientInterface
 
         // TODO: try-catch, status handling
         $buzOrder = $this->mapOrder($order);
+
+        $this->eventManager->dispatch('boekuwzending_order_create_before', ['boekuwzending_order' => $buzOrder]);
+
         $buzOrder = $this->client->order->create($buzOrder);
 
         $this->logger->info(sprintf('Created Boekuwzending order: %s', $buzOrder->getId()));
@@ -122,7 +134,8 @@ class BoekuwzendingClient implements BoekuwzendingClientInterface
         $contact = new OrderContact();
         $contact->setName($shippingAddress->getName());
         $contact->setCompany($shippingAddress->getCompany());
-        $contact->setPlainPhoneNumber($shippingAddress->getTelephone() ?? "");
+        //$contact->setPlainPhoneNumber($shippingAddress->getTelephone() ?? "");
+        $contact->setPhoneNumber($shippingAddress->getTelephone() ?? "");
         $contact->setEmailAddress($shippingAddress->getEmail());
 
         $buzOrder->setShipToContact($contact);
@@ -130,8 +143,11 @@ class BoekuwzendingClient implements BoekuwzendingClientInterface
         $address = new Address();
 
         $street = $shippingAddress->getStreet();
+
+        // Parse AddressLine1
         $parsedAddress = $this->addressParser->parseAddressLine($street[0]);
 
+        // And chuck the rest, if any, in AddressLine2
         if (count($street) > 1) {
             array_shift($street);
             $address->setAddressLine2(implode(' ', $street));
