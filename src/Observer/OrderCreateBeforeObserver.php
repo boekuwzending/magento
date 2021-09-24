@@ -4,6 +4,11 @@ namespace Boekuwzending\Magento\Observer;
 
 use Magento\Framework\Event\ObserverInterface;
 
+/**
+ * Example event observer for intercepting orders before they get sent to the API.
+ *
+ * See src/etc/events.xml
+ */
 class OrderCreateBeforeObserver implements ObserverInterface
 {
     public function __construct()
@@ -25,6 +30,6 @@ class OrderCreateBeforeObserver implements ObserverInterface
         /** @var Magento\Sales\Model\Order $magentoOrder */
         $magentoOrder = $observer->getData('magento_order');
 
-        dd($magentoOrder);
+        dd($magentoOrder->getShippingAddress()->getStreet());
     }
 }
