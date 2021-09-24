@@ -1,6 +1,0 @@
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
-    <!-- Example event observer for intercepting orders before they get sent to the API
-    <event name="boekuwzending_order_create_before">
-        <observer name="boekuwzending_order_create_before" instance="Boekuwzending\Magento\Observer\OrderCreateBeforeObserver"/>
-    </event> -->
-</config>
